@@ -1,0 +1,1 @@
+{"labels": ["Human Footman", "Human Rifleman", "Night Elf Archer", "Night Elf Huntress", "Orc Grunt", "Troll Headhunter", "Undead Crypt Fiend", "Undead Ghoul"], "multi_label": false, "height": 224, "width": 224, "examples": ["archer.jpg", "crypt_fiend.jpg", "footman.jpg", "ghoul.jpg", "grunt.jpg", "headhunter.jpg", "huntress.jpg", "rifleman.jpg"]}

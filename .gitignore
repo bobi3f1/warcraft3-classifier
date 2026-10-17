@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.gradio/
+.claude/
+data/
+model.pkl
+/model.onnx
+*.onnx.data
+_old_version/
+*.zip
+my_screenshots/
