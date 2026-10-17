@@ -23,6 +23,8 @@ function Dataset_Run takes nothing returns nothing
     local integer tries
     local real cx
     local real cy
+    local rect area
+    local destructable tree
     local real minx = GetRectMinX(bj_mapInitialPlayableArea) + 1500
     local real maxx = GetRectMaxX(bj_mapInitialPlayableArea) - 1500
     local real miny = GetRectMinY(bj_mapInitialPlayableArea) + 1500
@@ -217,6 +219,22 @@ function Dataset_Run takes nothing returns nothing
         call RemoveUnit(u)
     endloop
 
+    // load every model once now, so the game doesn't freeze when a unit appears for the first time
+    // (they are removed together with the first scene)
+    set i = 0
+    loop
+        exitwhen i >= n
+        call GroupAddUnit(scene, CreateUnit(Player(0), id[i], minx, miny, 0))
+        set i = i + 1
+    endloop
+    set i = 0
+    loop
+        exitwhen i >= nb
+        call GroupAddUnit(scene, CreateUnit(Player(0), building[i], minx, miny, 0))
+        set i = i + 1
+    endloop
+    call TriggerSleepAction(2.0)
+
     loop
         // remove the previous scene
         loop
@@ -226,13 +244,17 @@ function Dataset_Run takes nothing returns nothing
             call RemoveUnit(u)
         endloop
 
-        // random walkable spot
+        // random walkable spot with no trees (or other destructables) where the units will stand,
+        // or in front of them - trees closer to the camera would hide the units
         set tries = 0
         loop
             set cx = GetRandomReal(minx, maxx)
             set cy = GetRandomReal(miny, maxy)
             set tries = tries + 1
-            exitwhen tries > 50 or not IsTerrainPathable(cx, cy, PATHING_TYPE_WALKABILITY)
+            set area = Rect(cx - 750, cy - 650, cx + 750, cy + 400)
+            set tree = RandomDestructableInRectSimpleBJ(area)
+            call RemoveRect(area)
+            exitwhen tries > 100 or (tree == null and not IsTerrainPathable(cx, cy, PATHING_TYPE_WALKABILITY))
         endloop
 
         // day most of the time, sometimes night
@@ -252,9 +274,9 @@ function Dataset_Run takes nothing returns nothing
             exitwhen i >= k
             set c = GetRandomInt(0, n - 1)
             if id[c] == 'ushd' then
-                set u = CreateUnit(Player(0), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-150, 300), GetRandomReal(0, 360))
+                set u = CreateUnit(Player(0), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
             else
-                set u = CreateUnit(Player(GetRandomInt(0, 11)), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-150, 300), GetRandomReal(0, 360))
+                set u = CreateUnit(Player(GetRandomInt(0, 11)), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
             endif
             call UnitAddAbility(u, 'Aloc')
             call SetUnitAnimation(u, anim[GetRandomInt(0, 2)])
@@ -279,7 +301,10 @@ function Dataset_Run takes nothing returns nothing
 endfunction
 
 function Trig_Melee_Initialization_Actions takes nothing returns nothing
-    call Dataset_Run()
+    // only from the 1-second timer below, not a second time from "Run on Map Initialization"
+    if GetTriggerEventId() == EVENT_GAME_TIMER_EXPIRED then
+        call Dataset_Run()
+    endif
 endfunction
 
 function InitTrig_Melee_Initialization takes nothing returns nothing

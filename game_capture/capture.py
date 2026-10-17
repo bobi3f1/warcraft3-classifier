@@ -7,6 +7,7 @@ Screenshots go to data/screens/, labels to data/labels.csv. Stop any time with C
 import argparse, csv, re, time
 from pathlib import Path
 import mss
+import numpy as np
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -28,6 +29,7 @@ new_csv = not labels_csv.exists()
 print(f'Waiting for the game... (files appear in {shots_dir})', flush=True)
 while not list(shots_dir.glob('shot_*.txt')): time.sleep(0.1)
 first = min(int(p.stem.split('_')[1]) for p in shots_dir.glob('shot_*.txt'))
+prev = None                                               # pixels of the last saved screenshot
 
 with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as f:
     writer = csv.writer(f)
@@ -36,8 +38,16 @@ with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as 
         shot = shots_dir/f'shot_{i}.txt'
         while not shot.exists(): time.sleep(0.05)
         time.sleep(0.4)                                   # let the game draw the new scene
-        grab = screen.grab(screen.monitors[1])            # the main monitor
-        img = Image.frombytes('RGB', grab.size, grab.rgb).resize((1280, 720))
+        for attempt in range(10):                         # the game freezes for a moment when it loads a new model
+            grab = screen.grab(screen.monitors[1])        # the main monitor
+            img = Image.frombytes('RGB', grab.size, grab.rgb).resize((1280, 720))
+            pixels = np.asarray(img, dtype=np.float32)[40:520]   # the map area, without the UI
+            if prev is None or np.abs(pixels - prev).mean() > 3: break
+            time.sleep(0.2)                               # still the old scene on screen - try again
+        else:
+            print(f'shot {i}: screen did not change - skipped')
+            continue
+        prev = pixels
         if (shots_dir/f'shot_{i + 1}.txt').exists():
             print(f'shot {i}: too slow, scene already changed - skipped')
             continue

@@ -33,10 +33,13 @@ resnet34 21% → convnext_tiny_in22k 14–18%.
   units (51 unit ids → 48 classes; druid forms, Berserker share a class) side by side on a random walkable spot,
   random owner/facing/animation, `Aloc` so nothing fights, sometimes an unlabeled building, random zoom
   (1350–1900) and time of day, then writes the unit names with `PreloadGenEnd` to
-  `Documents\Warcraft III\CustomMapData\wc3dataset\shot_<n>.txt`. **Not yet tested in the real game.**
+  `Documents\Warcraft III\CustomMapData\wc3dataset\shot_<n>.txt`. Before the first scene it creates every
+  unit/building once so the models are loaded (otherwise the game freezes on a new model and the screenshot shows
+  the old scene). Spots with trees/destructables in the scene area are rejected (Northrend map had units hidden
+  in forests). First trial on 2026-10-17 (Reforged 3.0, Classic graphics) worked apart from that.
 - `game_capture/capture.py` — waits for each shot file, screenshots the main monitor (mss), saves
   `data/screens/<map>_<n>.jpg` (1280×720) and appends `fname,labels` (labels joined with `;`) to
-  `data/labels.csv`. Tested with a simulator. Starts from whichever shot appears first after it starts.
+  `data/labels.csv`. Re-grabs (then skips) if the map area hasn't changed since the last shot. Starts from whichever shot appears first after it starts.
 - `warcraft3_screenshots.ipynb` — reads `data/labels.csv`, validation = one whole map (`is_valid` column +
   `ColSplitter`), `Resize((360, 640), method='squish')`, no rotate/zoom augmentation, convnext_tiny_in22k,
   threshold picked by F1 on validation, per-unit recall/precision table, then exports the website files.
@@ -59,9 +62,13 @@ resnet34 21% → convnext_tiny_in22k 14–18%.
    `python game_capture/capture.py --map test --shots 30`, Test Map, then look at a few images in
    `data/screens/` together with `data/labels.csv`. Check: units visible and not hidden under the bottom UI
    panel, not too small, labels match what's on screen, Classic graphics, no fights/creeps. Tune placement
-   (`cy + GetRandomReal(-150, 300)`, x spread 1100), zoom and sleep time in `dataset_trigger.j` if needed.
+   (`cy + GetRandomReal(-300, 150)`, x spread 1100), zoom and sleep time in `dataset_trigger.j` if needed.
    If World Editor reports a JASS error, fix it (the script was written without access to the game).
 3. Delete the trial files, then capture 4–6 maps with different tilesets (~800 shots each).
+   **Done 2026-10-17:** 3161 shots — map1 Lordaeron Summer (dataset_1) 800, map2 Northrend (dataset_3) 766,
+   map3 Ashenvale (dataset_4) 799, map4 Lordaeron Summer, other map (dataset_5) 796 = validation map.
+   Removed to `data/rejected/`: first Northrend run (units hidden in forests, before the tree check), 34 Northrend
+   shots with ice-crystal doodads over units, 2 shots taken while quitting the game.
 4. Optionally collect 20–50 real gameplay screenshots in `my_screenshots/` (honest real-world test).
 5. Run `warcraft3_screenshots.ipynb` on the GPU, check the per-unit table, update the README results section
    with real numbers, test the site locally (`python -m http.server 8000 --directory docs`), commit and push.
