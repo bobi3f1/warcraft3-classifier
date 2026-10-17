@@ -10,3 +10,5 @@ model.pkl
 _old_version/
 *.zip
 my_screenshots/
+*.w3m
+*.w3x
