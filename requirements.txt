@@ -1,0 +1,9 @@
+fastai
+timm
+gradio
+ddgs
+onnx
+onnxruntime
+mss
+jupyterlab
+ipywidgets
