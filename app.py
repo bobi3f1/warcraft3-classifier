@@ -1,6 +1,11 @@
 from fastai.vision.all import *
 import gradio as gr
 
+def crop_ui(img: PILImage):
+    "Version 2's model.pkl needs this function (same as in warcraft3_screenshots.ipynb)"
+    w, h = img.size
+    return img.crop((0, int(h * 30 / 720), w, int(h * 530 / 720)))
+
 learn = load_learner('model.pkl')
 categories = learn.dls.vocab
 

@@ -1,0 +1,24 @@
+# GitHub Pages settings. The look comes from a separate theme repo, like the alembic theme in fast.ai's tinypets.
+title: Warcraft III Unit Finder
+description: A fastai course project - which Warcraft III units are on a screenshot.
+baseurl: /warcraft3-classifier
+remote_theme: bobi3f1/wc3-nightelf-theme@main
+plugins:
+  - jekyll-remote-theme
+topbar_stats:          # the resource counters in the top bar; hover one to see what it counts
+  - icon: gold
+    value: 48
+    title: Unit types the model knows
+  - icon: lumber
+    value: 4
+    title: Maps the screenshots come from
+  - icon: food
+    value: 3161
+    title: Training and test screenshots
+nav:
+  - title: Unit finder
+    url: /
+  - title: Moonlit style
+    url: /moonlit.html
+  - title: GitHub
+    url: https://github.com/bobi3f1/warcraft3-classifier
