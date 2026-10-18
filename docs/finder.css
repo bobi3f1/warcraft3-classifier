@@ -1,0 +1,51 @@
+/* The classifier widgets on index.html, using the colors of the Night Elf theme (--ne-...) */
+[hidden] { display: none !important; }
+
+.finder-lead { max-width: 60ch; margin: -6px auto 28px; text-align: center; color: var(--ne-text-dim); }
+.finder { display: grid; grid-template-columns: 3fr 2fr; gap: 26px; align-items: start; }
+
+/* the drop zone */
+.finder-well { position: relative; min-height: 280px; display: grid; place-items: center; padding: 0; overflow: hidden; }
+.finder-well.filled { display: block; min-height: 0; }
+.finder-well.drag { border-color: var(--ne-gold); }
+.finder-well.glow { animation: finder-flash 1.4s ease-out; }
+@keyframes finder-flash {
+  35% { box-shadow: inset 0 0 0 1px #000, 0 0 28px rgba(252, 210, 13, 0.45); }
+}
+.empty { padding: 28px; text-align: center; color: var(--ne-text-dim); }
+.empty strong { display: block; margin-bottom: 4px; font: 400 1.4rem var(--ne-title); color: #f4f1e6; }
+.empty button { margin-top: 16px; }
+#preview { display: block; width: 100%; height: auto; }
+
+/* the results */
+.finder-seen h2 { margin-top: 0; }
+#status { min-height: 1.6em; color: var(--ne-text-dim); }
+.unit { margin: 0 0 10px; }
+.unit .row { display: flex; justify-content: space-between; gap: 12px; }
+.unit .p { color: var(--ne-text-dim); font-variant-numeric: tabular-nums; }
+.bar { height: 8px; margin-top: 3px; background: #05070e; border: 1px solid #2f2647; }
+.bar div { height: 100%; background: linear-gradient(#ffe25a, #c99a00); }
+.unit.wrong .row span:first-child { color: var(--ne-text-dim); text-decoration: line-through; }
+.unit.wrong .bar div { background: #4e3f6e; }
+.legend { font-size: 0.9rem; color: var(--ne-text-dim); }
+.missed { padding-top: 10px; border-top: 1px solid #2f2647; color: var(--ne-text-dim); }
+.missed span { color: var(--ne-text); }
+
+/* the example gallery: thumbnails, not menu buttons */
+.shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ne-dialog .shot {
+  padding: 0; overflow: hidden; text-align: left; font: 400 0.9rem var(--ne-body); color: var(--ne-text-dim);
+  text-shadow: none; background: #05070e; border: 2px solid #2f2647; box-shadow: inset 0 0 0 1px #000;
+}
+.ne-dialog .shot:hover, .ne-dialog .shot[aria-pressed="true"] {
+  color: #fff; background: #05070e; border-color: var(--ne-gold); text-shadow: none;
+}
+.shot img { display: block; width: 100%; aspect-ratio: 1280 / 500; object-fit: cover;
+            object-position: 50% 14%; }              /* the battlefield, without the game's UI */
+.shot span { display: block; padding: 4px 8px; }
+
+@media (max-width: 760px) {
+  .finder { grid-template-columns: 1fr; }
+  .shots { grid-template-columns: repeat(2, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .finder-well.glow { animation: none; } }

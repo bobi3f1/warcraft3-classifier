@@ -27,6 +27,24 @@
 Изводът: **почистването на данните помогна повече от смяната на модела.** Снимките от интернет са
 пълни с fan art, Reforged графика и грешни картинки — затова версия 2 използва снимки от самата игра.
 
+## Резултати от версия 2
+
+Данни: 3161 screenshot-а от 4 карти (Lordaeron Summer ×2, Northrend, Ashenvale). Проверката (validation) е
+върху **цяла карта (map4), която моделът никога не е виждал** — 796 снимки с 2742 единици.
+
+| Опит | F1 (macro) | намерени единици | грешни "намерени" |
+|---|---|---|---|
+| `convnext_tiny_in22k`, цял екран 640×360, 6 епохи | 0.38 | 44% | 2046 |
+| **същият, изрязан интерфейс → 768×300, 12 епохи** | **0.64** | **65%** | **900** |
+| същият, смален за браузъра (int8 ONNX) | 0.64 | 64% | 902 |
+
+- Прагът (threshold) е 0.2, избран по F1 върху validation.
+- Големите единици се познават добре (Obsidian Statue, Mountain Giant, Siege Engine, Kodo — над 90%),
+  малките пешеходци — зле (Ghoul 22%, Peon 24%, Grunt 29%, Peasant 31%): на 768×300 те са 15–25 пиксела.
+- Само 18% от снимките са познати **изцяло** (всички единици, без грешна).
+- Опит с learning rate от `lr_find` директно — обучението се разпадна (тегла `NaN`); затова 2e-3 и
+  `SaveModelCallback` + `TerminateOnNaNCallback` (подробности в notebook-а).
+
 ## Файлове
 
 | Файл | Какво прави |
@@ -99,7 +117,8 @@
 
 1. `jupyter lab` → отворете `warcraft3_screenshots.ipynb` → **Run → Run All Cells**.
 2. Последната секция записва `docs/model.onnx`, `docs/model.json` и примерни снимки в `docs/examples/`.
-3. Проверете сайта локално: `python -m http.server 8000 --directory docs` → `http://localhost:8000`.
+3. Проверете сайта локално: `python -m http.server 8000 --directory docs` → `http://localhost:8000/moonlit.html`.
+   (`index.html` използва Jekyll тема и изглежда правилно само в GitHub Pages — вижте "Темата" по-долу.)
 4. Качете в GitHub: `git add .`, `git commit -m "Version 2: game screenshots"`, `git push`.
 
 ## Как работи сайтът
@@ -108,11 +127,27 @@
 затова моделът работи **директно в браузъра** на посетителя:
 
 1. Notebook-ът записва модела във формат **ONNX** и го смалява ~3 пъти (int8 quantization).
-2. `docs/index.html` го зарежда с [onnxruntime-web](https://onnxruntime.ai/docs/tutorials/web/).
+2. `docs/app.js` го зарежда с [onnxruntime-web](https://onnxruntime.ai/docs/tutorials/web/).
 3. `docs/model.json` казва на страницата имената на единиците, размера на снимката, дали моделът е
    multi-label и какъв е прагът — затова страницата работи и с двете версии без промени.
 
 Няма сървър, който да заспива или да има лимити.
+
+### Темата (два стила)
+
+Както в Lesson 2 (fast.ai tinypets използва темата `alembic`), видът на сайта идва от **отделно repository** —
+[bobi3f1/wc3-nightelf-theme](https://github.com/bobi3f1/wc3-nightelf-theme), Jekyll тема в стила на
+интерфейса на Night Elf в играта. Включва се с два реда в `docs/_config.yml`:
+
+```yaml
+remote_theme: bobi3f1/wc3-nightelf-theme@main
+plugins:
+  - jekyll-remote-theme
+```
+
+- `docs/index.html` — страницата с темата (`layout: page`: прозорец като Game Menu в играта);
+- `docs/moonlit.html` — втори стил, обикновен HTML без тема (лунна нощ в Ashenvale);
+- двете използват един и същ код: `docs/app.js`.
 
 ## Публикуване в GitHub Pages
 

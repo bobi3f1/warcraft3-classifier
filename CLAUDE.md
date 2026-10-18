@@ -21,7 +21,7 @@ so they must be able to explain every line.
 | Input → output | crop of one unit → 1 of 8 units | whole game screenshot → which of 48 units are present |
 | Data | web images (DuckDuckGo), hand-cleaned; not in the repo | screenshots made by the game via World Editor map |
 | Type | single-label, softmax | multi-label (`MultiCategoryBlock`), sigmoid + threshold |
-| Result | convnext_tiny_in22k, 17.9% error (int8 ONNX: 19.0%) | not trained yet |
+| Result | convnext_tiny_in22k, 17.9% error (int8 ONNX: 19.0%) | convnext_tiny_in22k, UI cropped, 768×300, 12 epochs: macro F1 0.644, 65% of units found, thr 0.2 (int8 ONNX: F1 0.641) on unseen map4 |
 
 Version 1 history for the report: resnet18 on raw web images 52% error → 26% after hand-cleaning →
 resnet34 21% → convnext_tiny_in22k 14–18%.
@@ -46,8 +46,13 @@ resnet34 21% → convnext_tiny_in22k 14–18%.
   Tested end-to-end on fake composited data (resnet18, 1 epoch).
 - `docs/` — GitHub Pages site. The model runs **in the browser** with onnxruntime-web 1.30.0 (Hugging Face free
   Spaces give a 403 "cpu-basic quota limit", so no Python server). `docs/model.json` tells the page the labels,
-  input width/height, `multi_label` and `threshold`, and lists `docs/examples/`. The page works for both
-  versions without code changes.
+  input width/height, `multi_label` and `threshold`, optional `crop_top`/`crop_bottom` (fractions of the image
+  height, same as `crop_ui` in the notebook) and lists `docs/examples/` (+ `example_labels` so the gallery can
+  mark right/wrong/missed — the notebook export still has to write that key). The page works for both versions.
+  Two styles sharing `docs/app.js`: `index.html` is a Jekyll page (`layout: page`) using the separate theme repo
+  `bobi3f1/wc3-nightelf-theme` via `remote_theme` in `docs/_config.yml` (like tinypets/alembic in Lesson 2);
+  `moonlit.html` is plain HTML. No Ruby here, so `index.html` only renders on GitHub Pages; locally test
+  `moonlit.html` with http.server.
 - Export details that matter: `torch.onnx.export(..., dynamo=False)` (the dynamo exporter's output breaks
   quantization), then `quantize_dynamic(..., QuantType.QInt8, op_types_to_quantize=['MatMul','Gemm'],
   per_channel=True)` — per-channel kept accuracy (82.1% → 81.0%); without it accuracy fell to 77.4%.
