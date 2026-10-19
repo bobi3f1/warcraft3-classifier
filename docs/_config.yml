@@ -13,7 +13,7 @@ topbar_stats:          # the resource counters in the top bar; hover one to see 
     value: 4
     title: Maps the screenshots come from
   - icon: food
-    value: 3161
+    value: 3933
     title: Training and test screenshots
 nav:
   - title: Unit finder

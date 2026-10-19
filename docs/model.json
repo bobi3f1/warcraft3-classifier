@@ -1,1 +1,125 @@
-{"labels": ["Human Dragonhawk Rider", "Human Flying Machine", "Human Footman", "Human Gryphon Rider", "Human Knight", "Human Mortar Team", "Human Peasant", "Human Priest", "Human Rifleman", "Human Siege Engine", "Human Sorceress", "Human Spell Breaker", "Night Elf Archer", "Night Elf Chimaera", "Night Elf Druid of the Claw", "Night Elf Druid of the Talon", "Night Elf Dryad", "Night Elf Faerie Dragon", "Night Elf Glaive Thrower", "Night Elf Hippogryph", "Night Elf Hippogryph Rider", "Night Elf Huntress", "Night Elf Mountain Giant", "Night Elf Wisp", "Orc Demolisher", "Orc Grunt", "Orc Kodo Beast", "Orc Peon", "Orc Raider", "Orc Shaman", "Orc Tauren", "Orc Wind Rider", "Tauren Spirit Walker", "Troll Batrider", "Troll Headhunter", "Troll Witch Doctor", "Undead Abomination", "Undead Acolyte", "Undead Banshee", "Undead Crypt Fiend", "Undead Destroyer", "Undead Frost Wyrm", "Undead Gargoyle", "Undead Ghoul", "Undead Meat Wagon", "Undead Necromancer", "Undead Obsidian Statue", "Undead Shade"], "multi_label": true, "threshold": 0.19999998807907104, "height": 300, "width": 768, "crop_top": 0.041666666666666664, "crop_bottom": 0.7361111111111112, "examples": ["map4_0000.jpg", "map4_0001.jpg", "map4_0002.jpg", "map4_0003.jpg", "map4_0004.jpg", "map4_0005.jpg", "map4_0006.jpg", "map4_0007.jpg"], "example_labels": {"map4_0000.jpg": ["Human Sorceress", "Troll Headhunter"], "map4_0001.jpg": ["Night Elf Archer", "Night Elf Druid of the Talon", "Night Elf Hippogryph", "Orc Demolisher", "Orc Peon", "Orc Wind Rider"], "map4_0002.jpg": ["Night Elf Mountain Giant", "Troll Witch Doctor"], "map4_0003.jpg": ["Night Elf Huntress", "Orc Kodo Beast", "Troll Headhunter", "Undead Banshee", "Undead Necromancer", "Undead Shade"], "map4_0004.jpg": ["Night Elf Faerie Dragon", "Orc Kodo Beast", "Undead Frost Wyrm", "Undead Obsidian Statue"], "map4_0005.jpg": ["Human Peasant", "Troll Headhunter", "Undead Crypt Fiend"], "map4_0006.jpg": ["Troll Headhunter", "Undead Abomination", "Undead Destroyer", "Undead Meat Wagon"], "map4_0007.jpg": ["Human Knight", "Troll Headhunter", "Undead Abomination", "Undead Crypt Fiend", "Undead Necromancer"]}}
+{
+  "labels": [
+    "Human Dragonhawk Rider",
+    "Human Flying Machine",
+    "Human Footman",
+    "Human Gryphon Rider",
+    "Human Knight",
+    "Human Mortar Team",
+    "Human Peasant",
+    "Human Priest",
+    "Human Rifleman",
+    "Human Siege Engine",
+    "Human Sorceress",
+    "Human Spell Breaker",
+    "Night Elf Archer",
+    "Night Elf Chimaera",
+    "Night Elf Druid of the Claw",
+    "Night Elf Druid of the Talon",
+    "Night Elf Dryad",
+    "Night Elf Faerie Dragon",
+    "Night Elf Glaive Thrower",
+    "Night Elf Hippogryph",
+    "Night Elf Hippogryph Rider",
+    "Night Elf Huntress",
+    "Night Elf Mountain Giant",
+    "Night Elf Wisp",
+    "Orc Demolisher",
+    "Orc Grunt",
+    "Orc Kodo Beast",
+    "Orc Peon",
+    "Orc Raider",
+    "Orc Shaman",
+    "Orc Tauren",
+    "Orc Wind Rider",
+    "Tauren Spirit Walker",
+    "Troll Batrider",
+    "Troll Headhunter",
+    "Troll Witch Doctor",
+    "Undead Abomination",
+    "Undead Acolyte",
+    "Undead Banshee",
+    "Undead Crypt Fiend",
+    "Undead Destroyer",
+    "Undead Frost Wyrm",
+    "Undead Gargoyle",
+    "Undead Ghoul",
+    "Undead Meat Wagon",
+    "Undead Necromancer",
+    "Undead Obsidian Statue",
+    "Undead Shade"
+  ],
+  "multi_label": true,
+  "threshold": 0.2,
+  "height": 500,
+  "width": 1280,
+  "crop_top": 0.041666666666666664,
+  "crop_bottom": 0.7361111111111112,
+  "examples": [
+    "map4_0000.jpg",
+    "map4_0001.jpg",
+    "map4_0002.jpg",
+    "map4_0003.jpg",
+    "map4_0004.jpg",
+    "map4_0005.jpg",
+    "map4_0006.jpg",
+    "map4_0007.jpg"
+  ],
+  "example_labels": {
+    "map4_0000.jpg": [
+      "Human Sorceress",
+      "Troll Headhunter"
+    ],
+    "map4_0001.jpg": [
+      "Night Elf Archer",
+      "Night Elf Druid of the Talon",
+      "Night Elf Hippogryph",
+      "Orc Demolisher",
+      "Orc Peon",
+      "Orc Wind Rider"
+    ],
+    "map4_0002.jpg": [
+      "Night Elf Mountain Giant",
+      "Troll Witch Doctor"
+    ],
+    "map4_0003.jpg": [
+      "Night Elf Huntress",
+      "Orc Kodo Beast",
+      "Troll Headhunter",
+      "Undead Banshee",
+      "Undead Necromancer",
+      "Undead Shade"
+    ],
+    "map4_0004.jpg": [
+      "Night Elf Faerie Dragon",
+      "Orc Kodo Beast",
+      "Undead Frost Wyrm",
+      "Undead Obsidian Statue"
+    ],
+    "map4_0005.jpg": [
+      "Human Peasant",
+      "Troll Headhunter",
+      "Undead Crypt Fiend"
+    ],
+    "map4_0006.jpg": [
+      "Troll Headhunter",
+      "Undead Abomination",
+      "Undead Destroyer",
+      "Undead Meat Wagon"
+    ],
+    "map4_0007.jpg": [
+      "Human Knight",
+      "Troll Headhunter",
+      "Undead Abomination",
+      "Undead Crypt Fiend",
+      "Undead Necromancer"
+    ]
+  },
+  "model_file": "model-small-focus-v2.onnx",
+  "model_name": "ConvNeXt Small — Focus v2",
+  "architecture": "convnext_small.fb_in22k",
+  "source_version": 2,
+  "source_notebook": "https://www.kaggle.com/code/borisaladzhov/warcraft-iii-small-focus-retraining",
+  "checkpoint": "clean_small_best.pth",
+  "weight_storage": "float16 with float32 computation"
+}
