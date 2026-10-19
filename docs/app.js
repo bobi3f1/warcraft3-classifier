@@ -72,9 +72,9 @@ async function classify() {
     const scores = logits.map((x, i) => ({ label: info.labels[i], p: 1 / (1 + Math.exp(-x)) }))
                          .sort((a, b) => b.p - a.p);
     const found = scores.filter(c => c.p >= info.threshold);
-    status.textContent = found.length ? `It found ${found.length} unit type${found.length > 1 ? "s" : ""}.`
-                                      : "It found no units. Its closest guesses:";
-    result.innerHTML = bars(found.length ? found : scores.slice(0, 3));
+    status.textContent = found.length ? `Predicted ${found.length} unit type${found.length > 1 ? "s" : ""}.`
+                                      : "No unit types identified. Small or hidden units may be missed.";
+    result.innerHTML = bars(found);
     if (truth) {
       const right = found.filter(c => truth.includes(c.label)).length;
       const missed = truth.filter(l => !found.some(c => c.label === l));
