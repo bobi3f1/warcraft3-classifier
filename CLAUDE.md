@@ -54,8 +54,24 @@ single-label classifier names each crop.
 - `dataset_trigger.j` now fixes camera rotation/AoA and writes `UNIT|name|x|y|zoom` per unit (x, y relative
   to the camera target); `capture.py` writes those to `data/units.csv` (labels.csv unchanged). Not yet
   compiled/run in the game.
-- Still to do: new mixed captures with positions, a full solo validation map and a test map, combine
-  detector + crop classifier if the detector's classes are weaker, ONNX export and a new site page.
+- Goal set by the user (2026-10-23): 98–99% fully-correct on **real** in-game screenshots, training on Kaggle.
+  Main failure so far: misses when units stand close (solo shots never show that); 336/455 wrong map4
+  shots were misses only; exact match 81% with 1 unit type → 0% with 6.
+- `dataset_trigger.j` (rewritten, NOT yet compiled/run in game): modes row / crowded group / two armies
+  fighting (BlzSetUnitMaxHP 100000, attack-move) / army of one type; 1–8 units; unlabeled heroes (16 ids),
+  building, spell effects, selection circles; units paused and positions logged with GetUnitX/Y right before
+  the marker (the game pushes overlapping units apart, so requested positions were wrong).
+- Map names decide the split everywhere: `valid` / `test` in the name, `trial` = ignored, else train.
+- Both notebooks build one unit table from solo (projected) + `data/units.csv` (projected, `visible()` drops
+  off-screen / under-panel units) + `my_screenshots/{train,test}/labels/*.txt` (hand-checked YOLO txt,
+  class = line in `my_screenshots/classes.txt` = sorted vocab). Real train images ×4 in YOLO data.
+  ROOT/WORK switch for Kaggle (`/kaggle/input` rglob for `single_units/labels.csv`, write `/kaggle/working`).
+  Detector: yolo26m, EPOCHS 60, `time=HOURS` 10, batch 4/GPU, device = all GPUs (T4×2); conf and merge-IoU
+  picked on valid; reports valid / test / real-test; exports ONNX + thresholds.json.
+- `prelabel_screenshots.py` writes model drafts to `labels_draft/` (never read by notebooks) for review in
+  makesense.ai; `make_kaggle_dataset.py` → `kaggle_dataset.zip`.
+- Still to do after the user's captures: Kaggle run, then a new site page for the detector (box decoding in
+  `docs/app.js`, YOLO26 is NMS-free).
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
 

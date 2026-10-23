@@ -87,6 +87,68 @@
   (заедно със случайните `nan` — признак за нестабилна GPU: температура/overclock).
 - Прагът `conf` = 0.3 е избран по същата solo validation карта; нужна е и отделна test карта.
 
+### Към 98–99% на истински screenshot-и: данни и обучение в Kaggle
+
+Главната грешка досега: детекторът пропуска единици, когато стоят близо една до друга — solo снимките
+никога не показват това. Истинската игра добавя битки, заклинания, герои, кръгове на избрани единици.
+Затова трябват три вида нови данни:
+
+| Данни | Колко | Какво оправя |
+|---|---|---|
+| Смесени сцени с новия `dataset_trigger.j` (тълпи, армии, битки, герои, ефекти) | 4 training карти × 800 + 1 validation + 1 test карта × 400 | пропуснатите единици в тълпа, броенето |
+| Solo test карта (`capture_single.py --map single-test1 --split test`) | 1 карта | честна проверка на отделните единици |
+| Истински screenshot-и от игри (`my_screenshots/train`, `my_screenshots/test`) | поне 100 + 100 | всичко, което генераторът не показва; `test` е проверката за 98–99% |
+
+**1. Смесени сцени.** Поставете новия `game_capture/dataset_trigger.j` в World Editor (стъпка 3 по-горе),
+на карти с **различен терен** (лято, зима, пустиня, гора, Northrend, подземие). Името в `--map` решава
+ролята: с `valid` → validation, с `test` → test, с `trial` → не се използва, всичко друго → training.
+Първо кратка проба, после пълният запис:
+
+```bash
+python game_capture/capture.py --map mixed-trial --shots 30
+```
+
+```bash
+python game_capture/capture.py --map mixed-train1 --shots 800
+```
+
+(`mixed-train2…4`, `mixed-valid1` и `mixed-test1` — с `--shots 400` — всеки на **друга** карта.) В пробата
+проверете в `data/units.csv`, че има редове, и в няколко снимки, че има битки и тълпи. Новият JASS още не е
+пускан в играта — ако World Editor покаже грешка, пратете ми текста.
+
+**2. Истински screenshot-и.** Играйте skirmish срещу компютъра или гледайте replay-и с класическа графика и
+натискайте **Print Screen** (снимките отиват в `Documents\Warcraft III\ScreenShots`). Разнообразие: четирите
+раси, различни карти, битки, бази, ден и нощ. Копирайте около половината в `my_screenshots/train/`, а другата
+половина — **от други игри** — в `my_screenshots/test/`. После:
+
+```bash
+python prelabel_screenshots.py
+```
+
+Моделът рисува чернови в `labels_draft/`. Поправете ги в [makesense.ai](https://www.makesense.ai) (работи в
+браузъра, снимките не се качват никъде): **Object Detection** → заредете снимките от една папка → етикети от
+`my_screenshots/classes.txt` → *Actions → Import Annotations → YOLO* (файловете от `labels_draft/`) →
+поправете → *Actions → Export Annotations → YOLO* → разархивирайте в `labels/` до снимките.
+Правила: рамка само за 48-те единици (не за герои, сгради, creep-ове, призовани същества); рисувайте като
+черновите — от малко над главата до малко под краката, около два пъти по-широко от единицата; всяка видима
+единица получава рамка, дори ако е частично закрита.
+
+**3. Kaggle.**
+
+```bash
+python make_kaggle_dataset.py
+```
+
+Качете `kaggle_dataset.zip` в Kaggle → *Datasets → New Dataset* (private). После *Create → New Notebook →
+File → Import Notebook* с `warcraft3_unit_crops.ipynb`; *Add Input* → вашия dataset; *Settings →
+Accelerator: GPU T4 ×2, Internet: on*; *Save Version → Save & Run All*. Когато свърши, направете същото с
+`warcraft3_detector.ipynb`, като добавите като input и **output-а** на първия notebook (там е
+`unit_classifier.pkl`). Детекторът (`yolo26m`, 1280 px) спира сам след 10 часа (`HOURS`). Свалете от
+*Output*: `models/detector/weights/best.pt`, `best.onnx`, `thresholds.json` и `unit_crops/unit_classifier.pkl`.
+
+Честно: 98–99% на истински screenshot-и не е гарантирано. Генерираните сцени помагат много, но най-силно
+влияят истинските screenshot-и в training — колкото повече и по-разнообразни, толкова по-добре.
+
 ## Файлове
 
 | Файл | Какво прави |
