@@ -26,6 +26,39 @@ so they must be able to explain every line.
 Version 1 history for the report: resnet18 on raw web images 52% error → 26% after hand-cleaning →
 resnet34 21% → convnext_tiny_in22k 14–18%.
 
+## Version 3 (started 2026-10-23): detect, then classify crops
+
+Version 2 only reached 18% fully-correct screenshots and can't count, because a unit is ~50×60 px of a
+1280×720 shot. Version 3 splits it: a detector finds one box per unit (gives the count), and a fast.ai
+single-label classifier names each crop.
+
+- Solo shots (`dataset_trigger_single.j` + `capture_single.py` → `data/single_units/`, one unit type, 1–3
+  copies) place copies at known offsets from the camera target (rotation 90, angle of attack 304, distance =
+  `zoom`). `unit_boxes()` in `warcraft3_unit_crops.ipynb` projects them to screen: F=908, CX=630, CY=286
+  (measured from shots, checked on all three train maps, fliers included).
+- `warcraft3_unit_crops.ipynb` → `data/unit_crops/` (3967 crops), convnext_tiny.fb_in22k 224, fp16,
+  `fine_tune(8, 2e-3)`: **98.8%** on unseen `single-valid1` (167 crops, only 3–4 per class).
+  Map-2 frames excluded for the warning text are reused when the crop box doesn't touch the text.
+- On this GTX 1080 Ti training sometimes hits NaN at a random batch (not LR-related, pretrained gammas
+  are already ~54); keep `SaveModelCallback` + `TerminateOnNaNCallback`.
+- `warcraft3_detector.ipynb` (user approved ultralytics, 2026-10-23): YOLO26s (`yolo26s.pt`, NMS-free),
+  boxes from `screen_box(x, y, zoom)` = same box as the crops, worker icon hidden (`hide_worker_icon`, must
+  also be applied at inference), dataset in `data/yolo/`, run in `models/detector/`. imgsz 1280, batch 4
+  (batch 8 overflows 11 GB and crawls), 30 epochs ≈ 7.5 min/epoch, mosaic turns solo shots into mixed
+  scenes. Evaluates count-correct / whole-image-correct on `single-valid1` and set-match on old map4.
+  Scripts using ultralytics outside a notebook need `if __name__ == '__main__':` on Windows.
+  Result (best = epoch 20; epoch 26 died with "CUDA error: illegal instruction" — GPU looks unstable):
+  solo valid whole-image correct 93.4% → 95.8% with one-box-per-unit merge (IoU>0.5); map4 mixed set-match
+  37.2% → 42.8% with merge + crop classifier relabel (v2: 18%), units found 70.5%, wrong 134 (v2: 900).
+  conf 0.3 picked on the same solo valid map. `find_units()` in the notebook = the full pipeline.
+- `dataset_trigger.j` now fixes camera rotation/AoA and writes `UNIT|name|x|y|zoom` per unit (x, y relative
+  to the camera target); `capture.py` writes those to `data/units.csv` (labels.csv unchanged). Not yet
+  compiled/run in the game.
+- Still to do: new mixed captures with positions, a full solo validation map and a test map, combine
+  detector + crop classifier if the detector's classes are weaker, ONNX export and a new site page.
+- The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
+  `prepare_clean_retrain.py` were never run; superseded by this plan.
+
 ## How the pieces fit
 
 - `game_capture/dataset_trigger.j` — JASS, pasted into World Editor as the custom text of the
@@ -39,7 +72,7 @@ resnet34 21% → convnext_tiny_in22k 14–18%.
   in forests). First trial on 2026-10-17 (Reforged 3.0, Classic graphics) worked apart from that.
 - `game_capture/capture.py` — waits for each shot file, screenshots the main monitor (mss), saves
   `data/screens/<map>_<n>.jpg` (1280×720) and appends `fname,labels` (labels joined with `;`) to
-  `data/labels.csv`. Re-grabs (then skips) if the map area hasn't changed since the last shot. Starts from whichever shot appears first after it starts.
+  `data/labels.csv`, plus one `fname,label,x,y,zoom` row per unit to `data/units.csv`. Re-grabs (then skips) if the map area hasn't changed since the last shot. Starts from whichever shot appears first after it starts.
 - `warcraft3_screenshots.ipynb` — reads `data/labels.csv`, validation = one whole map (`is_valid` column +
   `ColSplitter`), `Resize((360, 640), method='squish')`, no rotate/zoom augmentation, convnext_tiny_in22k,
   threshold picked by F1 on validation, per-unit recall/precision table, then exports the website files.

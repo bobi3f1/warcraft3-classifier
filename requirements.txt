@@ -1,5 +1,6 @@
 fastai
 timm
+ultralytics
 gradio
 ddgs
 onnx

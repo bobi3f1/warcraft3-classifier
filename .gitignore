@@ -13,3 +13,5 @@ my_screenshots/
 *.w3m
 *.w3x
 models/
+*.pt
+weights/

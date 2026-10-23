@@ -3,8 +3,10 @@
 // delete all of its text and paste this whole file instead.
 //
 // Every 1.5 seconds the map places 1-6 random units on a random spot, moves the camera there
-// and writes the names of the units to
+// and writes every unit to
 // Documents\Warcraft III\CustomMapData\wc3dataset\shot_<number>.txt
+// as "UNIT|name|x|y|zoom" (x, y = position relative to the camera target), so capture.py can
+// compute where each unit is on the screen (boxes for the detector).
 // capture.py waits for that file and takes the screenshot.
 
 function Dataset_Run takes nothing returns nothing
@@ -23,6 +25,9 @@ function Dataset_Run takes nothing returns nothing
     local integer tries
     local real cx
     local real cy
+    local real x
+    local real y
+    local real zoom
     local rect area
     local destructable tree
     local real minx = GetRectMinX(bj_mapInitialPlayableArea) + 1500
@@ -235,6 +240,11 @@ function Dataset_Run takes nothing returns nothing
     endloop
     call TriggerSleepAction(2.0)
 
+    // fixed camera angle (the game's default), the box formula in the notebooks depends on it
+    call SetCameraField(CAMERA_FIELD_ROTATION, 90, 0)
+    call SetCameraField(CAMERA_FIELD_ANGLE_OF_ATTACK, 304, 0)
+    call SetCameraField(CAMERA_FIELD_ROLL, 0, 0)
+
     loop
         // remove the previous scene
         loop
@@ -264,6 +274,7 @@ function Dataset_Run takes nothing returns nothing
             call SetFloatGameState(GAME_STATE_TIME_OF_DAY, GetRandomReal(7.0, 17.0))
         endif
 
+        set zoom = GetRandomReal(1350, 1900)
         call PreloadGenClear()
         call PreloadGenStart()
 
@@ -273,15 +284,17 @@ function Dataset_Run takes nothing returns nothing
         loop
             exitwhen i >= k
             set c = GetRandomInt(0, n - 1)
+            set x = cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60)
+            set y = cy + GetRandomReal(-300, 150)
             if id[c] == 'ushd' then
-                set u = CreateUnit(Player(0), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
+                set u = CreateUnit(Player(0), id[c], x, y, GetRandomReal(0, 360))
             else
-                set u = CreateUnit(Player(GetRandomInt(0, 11)), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
+                set u = CreateUnit(Player(GetRandomInt(0, 11)), id[c], x, y, GetRandomReal(0, 360))
             endif
             call UnitAddAbility(u, 'Aloc')
             call SetUnitAnimation(u, anim[GetRandomInt(0, 2)])
             call GroupAddUnit(scene, u)
-            call Preload(name[c])
+            call Preload("UNIT|" + name[c] + "|" + R2S(x - cx) + "|" + R2S(y - cy) + "|" + R2S(zoom))
             set i = i + 1
         endloop
 
@@ -293,7 +306,7 @@ function Dataset_Run takes nothing returns nothing
         endif
 
         call SetCameraPosition(cx, cy)
-        call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, GetRandomReal(1350, 1900), 0)
+        call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, zoom, 0)
         call PreloadGenEnd("wc3dataset\\shot_" + I2S(shot) + ".txt")
         set shot = shot + 1
         call TriggerSleepAction(1.5)

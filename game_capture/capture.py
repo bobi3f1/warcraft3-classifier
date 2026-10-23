@@ -2,7 +2,8 @@
 
 1. Start this:  python game_capture/capture.py --map twisted_meadows --shots 800
 2. Start the map in Warcraft III (World Editor -> Test Map) and don't touch the mouse.
-Screenshots go to data/screens/, labels to data/labels.csv. Stop any time with Ctrl+C.
+Screenshots go to data/screens/, labels to data/labels.csv, and every unit with its position
+(relative to the camera target, for the detector boxes) to data/units.csv. Stop any time with Ctrl+C.
 """
 import argparse, csv, re, time
 from pathlib import Path
@@ -25,15 +26,19 @@ out = Path('data/screens')
 out.mkdir(parents=True, exist_ok=True)
 labels_csv = Path('data/labels.csv')
 new_csv = not labels_csv.exists()
+units_csv = Path('data/units.csv')
+new_units_csv = not units_csv.exists()
 
 print(f'Waiting for the game... (files appear in {shots_dir})', flush=True)
 while not list(shots_dir.glob('shot_*.txt')): time.sleep(0.1)
 first = min(int(p.stem.split('_')[1]) for p in shots_dir.glob('shot_*.txt'))
 prev = None                                               # pixels of the last saved screenshot
 
-with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as f:
-    writer = csv.writer(f)
+with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as f, \
+     units_csv.open('a', newline='', encoding='utf-8') as fu:
+    writer, unit_writer = csv.writer(f), csv.writer(fu)
     if new_csv: writer.writerow(['fname', 'labels'])
+    if new_units_csv: unit_writer.writerow(['fname', 'label', 'x', 'y', 'zoom'])
     for i in range(first, first + args.shots):
         shot = shots_dir/f'shot_{i}.txt'
         while not shot.exists(): time.sleep(0.05)
@@ -51,10 +56,13 @@ with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as 
         if (shots_dir/f'shot_{i + 1}.txt').exists():
             print(f'shot {i}: too slow, scene already changed - skipped')
             continue
-        units = sorted(set(re.findall(r'Preload\( "([^"]*)" \)', shot.read_text(errors='ignore'))))
+        lines = re.findall(r'Preload\( "UNIT\|([^"]*)" \)', shot.read_text(errors='ignore'))
+        placed = [line.split('|') for line in lines]          # [name, x, y, zoom] for every unit
+        units = sorted(set(p[0] for p in placed))
         fname = f'{args.map}_{i:04d}.jpg'
         img.save(out/fname, quality=90)
         writer.writerow([fname, ';'.join(units)])
-        f.flush()
+        for p in placed: unit_writer.writerow([fname] + p)
+        f.flush(); fu.flush()
         print(i, fname, units, flush=True)
 print('Done.')
