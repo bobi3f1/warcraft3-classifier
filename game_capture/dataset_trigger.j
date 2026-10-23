@@ -7,7 +7,8 @@
 // fighting (they can't die), sometimes with unlabeled heroes, a building and spell effects.
 // Then it freezes the units and writes every labeled unit to
 // Documents\Warcraft III\CustomMapData\wc3dataset\shot_<number>.txt
-// as "UNIT|name|x|y|zoom" (x, y = position relative to the camera target), so capture.py can
+// as "UNIT|name|x|y|zoom|z" (x, y = position relative to the camera target, z = how much higher the
+// unit's ground is than the ground under the camera target), so capture.py can
 // compute where each unit is on the screen (boxes for the detector).
 // capture.py waits for that file and takes the screenshot.
 
@@ -48,6 +49,8 @@ function Dataset_Run takes nothing returns nothing
     local unit array su
     local string array sn
     local integer ns = 0
+    local location loc = Location(0, 0)
+    local real z0
     local rect area
     local destructable tree
     local real minx = GetRectMinX(bj_mapInitialPlayableArea) + 1500
@@ -460,13 +463,16 @@ function Dataset_Run takes nothing returns nothing
 
         // freeze the units and write where each labeled unit really is now
         // (the game pushes units apart when they are created on top of each other, and fighters move)
+        call MoveLocation(loc, cx, cy)
+        set z0 = GetLocationZ(loc)
         call PreloadGenClear()
         call PreloadGenStart()
         set i = 0
         loop
             exitwhen i >= ns
             call PauseUnit(su[i], true)
-            call Preload("UNIT|" + sn[i] + "|" + R2S(GetUnitX(su[i]) - cx) + "|" + R2S(GetUnitY(su[i]) - cy) + "|" + R2S(zoom))
+            call MoveLocation(loc, GetUnitX(su[i]), GetUnitY(su[i]))
+            call Preload("UNIT|" + sn[i] + "|" + R2S(GetUnitX(su[i]) - cx) + "|" + R2S(GetUnitY(su[i]) - cy) + "|" + R2S(zoom) + "|" + R2S(GetLocationZ(loc) - z0))
             set i = i + 1
         endloop
         call PreloadGenEnd("wc3dataset\\shot_" + I2S(shot) + ".txt")

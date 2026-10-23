@@ -116,6 +116,20 @@ python game_capture/capture.py --map mixed-train1 --shots 800
 проверете в `data/units.csv`, че има редове, и в няколко снимки, че има битки и тълпи. Новият JASS още не е
 пускан в играта — ако World Editor покаже грешка, пратете ми текста.
 
+**1б. Битки между компютърни играчи (истински игри с автоматични етикети).** Копие на melee карта на
+Blizzard → *Scenario → Player Properties*: играчи 2…N → *Controller: Computer*, *Race: Random* → в тригера
+**Melee Initialization** поставете `game_capture/dataset_trigger_battle.j` → *Save Map As* `battle_<име>.w3x`.
+Компютрите играят нормална игра; играч 1 няма единици и само гледа (никой не губи, играта продължава).
+На всеки ~5 секунди камерата отива при битка, всички единици замръзват за миг и картата записва всяка
+видима единица от 48-те (невидимите — Shade, Shadowmeld, работници в мината — не се броят).
+
+```bash
+python game_capture/capture.py --map battle-train1 --shots 1500 --units-csv data/battle_units.csv
+```
+
+Първите 30 секунди няма снимки. 1500 снимки ≈ 2 часа. Направете и една `battle-test1` на **друга** карта.
+Не се етикетират: герои, сгради, призовани същества, Militia (селяните с камбаната).
+
 **2. Истински screenshot-и.** Играйте skirmish срещу компютъра или гледайте replay-и с класическа графика и
 натискайте **Print Screen** (снимките отиват в `Documents\Warcraft III\ScreenShots`). Разнообразие: четирите
 раси, различни карти, битки, бази, ден и нощ. Копирайте около половината в `my_screenshots/train/`, а другата

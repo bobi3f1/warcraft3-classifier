@@ -61,6 +61,14 @@ single-label classifier names each crop.
   fighting (BlzSetUnitMaxHP 100000, attack-move) / army of one type; 1–8 units; unlabeled heroes (16 ids),
   building, spell effects, selection circles; units paused and positions logged with GetUnitX/Y right before
   the marker (the game pushes overlapping units apart, so requested positions were wrong).
+- 2026-10-24: the rewritten `dataset_trigger.j` compiled and ran on (8)Bloodvenom Falls → `mixed-train1-bloodvenom`
+  (800 shots, ~3.5 s/shot); boxes checked on the first shots, fights/armies/selection circles visible.
+  That run logs no `z`; the trigger now also writes `z` (terrain height vs camera target) for later maps.
+- `dataset_trigger_battle.j` (NOT yet run): computer players play real melee (MeleeStarting* without
+  MeleeInitVictoryDefeat, player 1's units removed), camera jumps to fights every ~5 s, PauseAllUnitsBJ,
+  logs every visible (IsUnitVisible / not IsUnitInvisible / not hidden) labeled unit with `z`.
+  `capture.py --units-csv data/battle_units.csv` (6 columns incl. z); notebooks read it as source 'battle'.
+  `screen_box(x, y, zoom, z)` handles terrain height.
 - Map names decide the split everywhere: `valid` / `test` in the name, `trial` = ignored, else train.
 - Both notebooks build one unit table from solo (projected) + `data/units.csv` (projected, `visible()` drops
   off-screen / under-panel units) + `my_screenshots/{train,test}/labels/*.txt` (hand-checked YOLO txt,

@@ -9,9 +9,10 @@ import pandas as pd
 files = [Path('data/single_units/labels.csv'), Path('data/single_units/excluded.csv')]
 files += sorted(Path('data/single_units/screens').glob('*.jpg'))
 
-if Path('data/units.csv').is_file():                       # mixed scenes with unit positions
-    files += [Path('data/units.csv'), Path('data/labels.csv')]
-    files += [Path('data/screens')/f for f in pd.read_csv('data/units.csv')['fname'].unique()]
+for csv_name in ['units.csv', 'battle_units.csv']:        # mixed scenes and computer-vs-computer games
+    if Path('data', csv_name).is_file():
+        files += [Path('data', csv_name)]
+        files += [Path('data/screens')/f for f in pd.read_csv(Path('data', csv_name))['fname'].unique()]
 if Path('data/labels.csv').is_file():                      # Version 2 validation map, to compare with
     files += [Path('data/labels.csv')]
     files += sorted(Path('data/screens').glob('map4_*.jpg'))
