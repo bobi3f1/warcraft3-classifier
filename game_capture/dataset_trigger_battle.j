@@ -5,7 +5,7 @@
 // Edit -> Convert to Custom Text, delete all of its text and paste this whole file instead.
 //
 // Player 1 (you) gets no units and is never defeated, so you just watch. Every ~4 seconds the camera
-// jumps to a fight (or a unit, or a base), all units freeze for a moment, and the map writes
+// jumps to a fight (or a unit, or a base), the units around the camera freeze for a moment, and the map writes
 // "UNIT|name|x|y|zoom|z" for every visible labeled unit (x, y = position relative to the camera target,
 // z = how much higher its ground is than the ground under the camera target) to
 // Documents\Warcraft III\CustomMapData\wc3dataset\shot_<number>.txt
@@ -16,6 +16,7 @@ function Dataset_Battle takes nothing returns nothing
     local string array name
     local integer n = 0
     local group all = CreateGroup()
+    local group frozen = CreateGroup()
     local unit array fight
     local integer nf
     local unit array any
@@ -296,7 +297,20 @@ function Dataset_Battle takes nothing returns nothing
             set cx = GetUnitX(focus) + GetRandomReal(-400, 400)
             set cy = GetUnitY(focus) + GetRandomReal(-250, 250)
             set zoom = GetRandomReal(1450, 1850)
-            call PauseAllUnitsBJ(true)
+            // freeze only the units around the camera (not buildings: pausing them breaks the computer
+            // players, e.g. the Night Elves' entangled gold mine); the rest of the map keeps playing
+            set area = Rect(cx - 1600, cy - 1000, cx + 1600, cy + 1200)
+            call GroupEnumUnitsInRect(all, area, null)
+            call RemoveRect(area)
+            loop
+                set u = FirstOfGroup(all)
+                exitwhen u == null
+                call GroupRemoveUnit(all, u)
+                if not IsUnitType(u, UNIT_TYPE_STRUCTURE) then
+                    call PauseUnit(u, true)
+                    call GroupAddUnit(frozen, u)
+                endif
+            endloop
             call TriggerSleepAction(0.0)
             call SetCameraPosition(cx, cy)
             call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, zoom, 0)
@@ -325,7 +339,12 @@ function Dataset_Battle takes nothing returns nothing
             call PreloadGenEnd("wc3dataset\\shot_" + I2S(shot) + ".txt")
             set shot = shot + 1
             call TriggerSleepAction(1.2)
-            call PauseAllUnitsBJ(false)
+            loop
+                set u = FirstOfGroup(frozen)
+                exitwhen u == null
+                call GroupRemoveUnit(frozen, u)
+                call PauseUnit(u, false)
+            endloop
         endif
         // let the game play on for a while
         call TriggerSleepAction(3.0)

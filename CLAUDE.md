@@ -78,7 +78,7 @@ single-label classifier names each crop.
   way since 2026-10-28 as `battle-train1b` (Richman's Garden, all 8 bases, z = 0 there, positions checked
   at full resolution: box centres land on the units). Discord overlay was turned off.
 - `dataset_trigger_battle.j` (compiled and ran once, see above): computer players play real melee (MeleeStarting* without
-  MeleeInitVictoryDefeat, player 1's units removed), camera jumps to fights every ~5 s, PauseAllUnitsBJ,
+  MeleeInitVictoryDefeat, player 1's units removed), camera jumps to fights every ~5 s, pauses only non-building units near the camera (PauseAllUnitsBJ broke the Night Elf AI), hashtable type lookup (the 51-way search hit the op limit late game),
   logs every visible (IsUnitVisible / not IsUnitInvisible / not hidden) labeled unit with `z`.
   `capture.py --units-csv data/battle_units.csv` (6 columns incl. z); notebooks read it as source 'battle'.
   `screen_box(x, y, zoom, z)` handles terrain height.
