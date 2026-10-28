@@ -73,6 +73,10 @@ single-label classifier names each crop.
   (z = 0) when it starts. Battle trial on Richman's Garden: only ONE computer slot was set → 76 shots of one
   Undead base (`battle-train1_*`, not yet renamed); collector died with exit 4. A webcam overlay (the user's
   face) was in the bottom-left corner of those battle shots — must be closed before capturing.
+- World Editor **Test Map only lets player 2 join** (players.txt: computers 3–8 playing=0). Battle maps must
+  be started from Warcraft III → Single Player → Custom Game with slots 2–8 set to Computer. Running that
+  way since 2026-10-28 as `battle-train1b` (Richman's Garden, all 8 bases, z = 0 there, positions checked
+  at full resolution: box centres land on the units). Discord overlay was turned off.
 - `dataset_trigger_battle.j` (compiled and ran once, see above): computer players play real melee (MeleeStarting* without
   MeleeInitVictoryDefeat, player 1's units removed), camera jumps to fights every ~5 s, PauseAllUnitsBJ,
   logs every visible (IsUnitVisible / not IsUnitInvisible / not hidden) labeled unit with `z`.

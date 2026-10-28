@@ -33,6 +33,7 @@ function Dataset_Battle takes nothing returns nothing
     local real zoom
     local real z0
     local location loc = Location(0, 0)
+    local hashtable typeindex = InitHashtable()
     local rect area
 
     // ---- the 48 units (some classes have two forms), same names as dataset_trigger.j ----
@@ -190,6 +191,15 @@ function Dataset_Battle takes nothing returns nothing
     set name[n] = "Undead Shade"
     set n = n + 1
 
+    // unit type -> number in the list above (+1, so 0 means "not one of ours"); one lookup instead of 51
+    // comparisons per unit, otherwise a late game with hundreds of units stops the script
+    set c = 0
+    loop
+        exitwhen c >= n
+        call SaveInteger(typeindex, 0, id[c], c + 1)
+        set c = c + 1
+    endloop
+
     // ---- a normal melee game, but player 1 only watches ----
     call FogEnable(false)
     call FogMaskEnable(false)
@@ -255,13 +265,8 @@ function Dataset_Battle takes nothing returns nothing
                     set base[nbase] = u
                     set nbase = nbase + 1
                 else
-                    set t = GetUnitTypeId(u)
-                    set c = 0
-                    loop
-                        exitwhen c >= n or id[c] == t
-                        set c = c + 1
-                    endloop
-                    if c < n then
+                    set c = LoadInteger(typeindex, 0, GetUnitTypeId(u)) - 1
+                    if c >= 0 then
                         set any[na] = u
                         set na = na + 1
                         if GetUnitCurrentOrder(u) == OrderId("attack") then
@@ -272,6 +277,8 @@ function Dataset_Battle takes nothing returns nothing
                 endif
             endif
         endloop
+
+        call TriggerSleepAction(0.0)    // a short wait also resets the script's work limit
 
         // camera: a fight most of the time, otherwise any unit or a base
         set c = GetRandomInt(1, 10)
@@ -290,6 +297,7 @@ function Dataset_Battle takes nothing returns nothing
             set cy = GetUnitY(focus) + GetRandomReal(-250, 250)
             set zoom = GetRandomReal(1450, 1850)
             call PauseAllUnitsBJ(true)
+            call TriggerSleepAction(0.0)
             call SetCameraPosition(cx, cy)
             call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, zoom, 0)
             call TriggerSleepAction(0.6)
@@ -307,13 +315,8 @@ function Dataset_Battle takes nothing returns nothing
                 exitwhen u == null
                 call GroupRemoveUnit(all, u)
                 if GetWidgetLife(u) > 0.405 and not IsUnitHidden(u) and IsUnitVisible(u, Player(0)) and not IsUnitInvisible(u, Player(0)) then
-                    set t = GetUnitTypeId(u)
-                    set c = 0
-                    loop
-                        exitwhen c >= n or id[c] == t
-                        set c = c + 1
-                    endloop
-                    if c < n then
+                    set c = LoadInteger(typeindex, 0, GetUnitTypeId(u)) - 1
+                    if c >= 0 then
                         call MoveLocation(loc, GetUnitX(u), GetUnitY(u))
                         call Preload("UNIT|" + name[c] + "|" + R2S(GetUnitX(u) - cx) + "|" + R2S(GetUnitY(u) - cy) + "|" + R2S(zoom) + "|" + R2S(GetLocationZ(loc) - z0))
                     endif
