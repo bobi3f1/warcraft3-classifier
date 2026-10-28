@@ -54,6 +54,19 @@ single-label classifier names each crop.
 - `dataset_trigger.j` now fixes camera rotation/AoA and writes `UNIT|name|x|y|zoom` per unit (x, y relative
   to the camera target); `capture.py` writes those to `data/units.csv` (labels.csv unchanged). Not yet
   compiled/run in the game.
+- **Capture finished 2026-10-28** (shots with units / units): train mixed-train1(b)-bloodvenom 777/3651,
+  mixed-train2-icecrown 813/3640, battle-train1b 422/4378, -1c 238/2524 (game froze: unpause bug, fixed),
+  -1d 533/6555, battle-train1 70/535 (one Undead base only, weak); valid mixed-valid1-divide 400/1846;
+  test mixed-test1-dustwallow 400/1782 (new trigger, z present). Total 3653 / 24911 + 2958 solo shots.
+  data/screens 2.0 GB, single_units/screens 1.3 GB. No real screenshots yet (my_screenshots/ empty).
+- Audit 2026-10-28 before Kaggle: no broken/duplicate/stalled files; moved to `data/rejected/`: all of
+  `battle-train1` (Discord overlay + webcam in every shot, one base) and 3 desktop frames (Alt+Tab).
+  All 48 classes in train/valid/test (min 130 train units). ~20% of battle units are off screen and dropped
+  by `visible()`. Known label noise: battle Wisps harvesting lumber under tree canopy (771 of 13448 battle
+  labels are Wisps; a future trigger could skip units with a tree right next to them).
+  Notebook data prep run locally on the full data: 26,013 units (21,870 train), YOLO 5561 train / 567 val /
+  400 test images; show_batch and YOLO train_batch checked. `kaggle_dataset.zip` 2.7 GB, 7339 files.
+  No Kaggle API token on this PC (no ~/.kaggle/kaggle.json, no CLI) → upload through the browser.
 - Goal set by the user (2026-10-23): 98–99% fully-correct on **real** in-game screenshots, training on Kaggle.
   Main failure so far: misses when units stand close (solo shots never show that); 336/455 wrong map4
   shots were misses only; exact match 81% with 1 unit type → 0% with 6.
