@@ -104,7 +104,7 @@ single-label classifier names each crop.
   picked on valid; reports valid / test / real-test; exports ONNX + thresholds.json.
 - `prelabel_screenshots.py` writes model drafts to `labels_draft/` (never read by notebooks) for review in
   makesense.ai; `make_kaggle_dataset.py` → `kaggle_dataset.zip`.
-- Still to do after the user's captures: Kaggle run, then a new site page for the detector (box decoding in
+- Kaggle 2026-10-28: crop notebook ran (T4×2, 24 min): valid_loss 1.76→0.63, **test mixed crops 84.1% of 1782** (crowded crops hold several units). Detector notebook now lets validation decide USE_CLASSIFIER (YOLO only vs YOLO + classifier). Still to do: detector Kaggle run, then a new site page for the detector (box decoding in
   `docs/app.js`, YOLO26 is NMS-free).
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
