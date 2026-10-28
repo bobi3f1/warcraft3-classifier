@@ -11,6 +11,10 @@
 // Documents\Warcraft III\CustomMapData\wc3dataset\shot_<number>.txt
 // capture.py waits for that file and takes the screenshot.
 
+function Dataset_Unpause takes nothing returns nothing
+    call PauseUnit(GetEnumUnit(), false)
+endfunction
+
 function Dataset_Battle takes nothing returns nothing
     local integer array id
     local string array name
@@ -339,12 +343,10 @@ function Dataset_Battle takes nothing returns nothing
             call PreloadGenEnd("wc3dataset\\shot_" + I2S(shot) + ".txt")
             set shot = shot + 1
             call TriggerSleepAction(1.2)
-            loop
-                set u = FirstOfGroup(frozen)
-                exitwhen u == null
-                call GroupRemoveUnit(frozen, u)
-                call PauseUnit(u, false)
-            endloop
+            // ForGroup, not a FirstOfGroup loop: a unit that died and vanished while frozen would end such a
+            // loop early and leave every unit after it frozen for the rest of the game
+            call ForGroup(frozen, function Dataset_Unpause)
+            call GroupClear(frozen)
         endif
         // let the game play on for a while
         call TriggerSleepAction(3.0)
