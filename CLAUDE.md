@@ -62,9 +62,18 @@ single-label classifier names each crop.
   building, spell effects, selection circles; units paused and positions logged with GetUnitX/Y right before
   the marker (the game pushes overlapping units apart, so requested positions were wrong).
 - 2026-10-24: the rewritten `dataset_trigger.j` compiled and ran on (8)Bloodvenom Falls → `mixed-train1-bloodvenom`
-  (800 shots, ~3.5 s/shot); boxes checked on the first shots, fights/armies/selection circles visible.
+  (~3.5 s/shot); boxes checked on the first shots, fights/armies/selection circles visible. The game was
+  closed after **177 shots** (806 units); a new run must use a new `--map` name (same name would overwrite
+  the jpgs and duplicate CSV rows). 2026-10-25: `mixed-train1b-bloodvenom` 600 shots (2845 units, 0 skipped);
+  Bloodvenom total 777 shots / 3651 units. Test Map starts from a fixed seed, so shot 0 repeats each run.
   That run logs no `z`; the trigger now also writes `z` (terrain height vs camera target) for later maps.
-- `dataset_trigger_battle.j` (NOT yet run): computer players play real melee (MeleeStarting* without
+- `mixed-valid1-divide` ((12)Divide and Conquer, validation map, old trigger → z = 0): 400 shots / 1846 units.
+- 2026-10-28: `mixed-train2-icecrown` ((12)Icecrown) done: 813 shots / 3640 units, 0 skipped; that map has the older trigger (no `z`), shots
+  ~9–34 lost during a collector restart. `capture.py` now upgrades an old 5-column units.csv to 6 columns
+  (z = 0) when it starts. Battle trial on Richman's Garden: only ONE computer slot was set → 76 shots of one
+  Undead base (`battle-train1_*`, not yet renamed); collector died with exit 4. A webcam overlay (the user's
+  face) was in the bottom-left corner of those battle shots — must be closed before capturing.
+- `dataset_trigger_battle.j` (compiled and ran once, see above): computer players play real melee (MeleeStarting* without
   MeleeInitVictoryDefeat, player 1's units removed), camera jumps to fights every ~5 s, PauseAllUnitsBJ,
   logs every visible (IsUnitVisible / not IsUnitInvisible / not hidden) labeled unit with `z`.
   `capture.py --units-csv data/battle_units.csv` (6 columns incl. z); notebooks read it as source 'battle'.

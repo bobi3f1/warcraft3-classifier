@@ -9,6 +9,7 @@ import argparse, csv, re, time
 from pathlib import Path
 import mss
 import numpy as np
+import pandas as pd
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -30,10 +31,13 @@ labels_csv = Path('data/labels.csv')
 new_csv = not labels_csv.exists()
 units_csv = Path(args.units_csv)
 new_units_csv = not units_csv.exists()
-# z = height of the unit's ground above the ground under the camera (0 if the map doesn't write it);
-# a file started before z existed keeps its 5 columns
+# z = height of the unit's ground above the ground under the camera (0 if the map doesn't write it)
 columns = ['fname', 'label', 'x', 'y', 'zoom', 'z']
-if not new_units_csv: columns = units_csv.read_text(encoding='utf-8').split('\n', 1)[0].strip().split(',')
+if not new_units_csv:
+    old = pd.read_csv(units_csv)
+    if 'z' not in old.columns:                            # a file from before z existed: add the column
+        old['z'] = 0.0
+        old.to_csv(units_csv, index=False)
 
 print(f'Waiting for the game... (files appear in {shots_dir})', flush=True)
 while not list(shots_dir.glob('shot_*.txt')): time.sleep(0.1)
@@ -68,7 +72,7 @@ with mss.MSS() as screen, labels_csv.open('a', newline='', encoding='utf-8') as 
         fname = f'{args.map}_{i:04d}.jpg'
         img.save(out/fname, quality=90)
         writer.writerow([fname, ';'.join(units)])
-        for p in placed: unit_writer.writerow(([fname] + p + ['0'])[:len(columns)])
+        for p in placed: unit_writer.writerow(([fname] + p + ['0'])[:6])     # maps without z get z = 0
         f.flush(); fu.flush()
         print(i, fname, units, flush=True)
 print('Done.')

@@ -201,6 +201,33 @@ function Dataset_Battle takes nothing returns nothing
     call MeleeStartingUnits()
     call MeleeStartingAI()
     // no MeleeInitVictoryDefeat(): nobody is ever defeated, so the game keeps going
+
+    // write who is in the game to wc3dataset\players.txt (to check that every computer player got a base)
+    call PreloadGenClear()
+    call PreloadGenStart()
+    set i = 0
+    loop
+        exitwhen i >= 12
+        set t = 0
+        call GroupEnumUnitsOfPlayer(all, Player(i), null)
+        loop
+            set u = FirstOfGroup(all)
+            exitwhen u == null
+            call GroupRemoveUnit(all, u)
+            set t = t + 1
+        endloop
+        set c = 0
+        if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+            set c = 1
+        endif
+        if GetPlayerController(Player(i)) == MAP_CONTROL_COMPUTER then
+            call Preload("PLAYER|" + I2S(i + 1) + "|computer|playing=" + I2S(c) + "|units=" + I2S(t))
+        elseif GetPlayerController(Player(i)) == MAP_CONTROL_USER then
+            call Preload("PLAYER|" + I2S(i + 1) + "|user|playing=" + I2S(c) + "|units=" + I2S(t))
+        endif
+        set i = i + 1
+    endloop
+    call PreloadGenEnd("wc3dataset\\players.txt")
     call GroupEnumUnitsOfPlayer(all, Player(0), null)
     loop
         set u = FirstOfGroup(all)
