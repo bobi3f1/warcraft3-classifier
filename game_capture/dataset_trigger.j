@@ -2,9 +2,14 @@
 // In World Editor: select the "Melee Initialization" trigger, Edit -> Convert to Custom Text,
 // delete all of its text and paste this whole file instead.
 //
-// Every 1.5 seconds the map places 1-6 random units on a random spot, moves the camera there
-// and writes the names of the units to
+// Every few seconds the map builds a new scene on a random spot and moves the camera there:
+// 1-8 random units in a row, in a crowded group, as an army of one type, or as two armies
+// fighting (they can't die), sometimes with unlabeled heroes, a building and spell effects.
+// Then it freezes the units and writes every labeled unit to
 // Documents\Warcraft III\CustomMapData\wc3dataset\shot_<number>.txt
+// as "UNIT|name|x|y|zoom|z" (x, y = position relative to the camera target, z = how much higher the
+// unit's ground is than the ground under the camera target), so capture.py can
+// compute where each unit is on the screen (boxes for the detector).
 // capture.py waits for that file and takes the screenshot.
 
 function Dataset_Run takes nothing returns nothing
@@ -23,6 +28,29 @@ function Dataset_Run takes nothing returns nothing
     local integer tries
     local real cx
     local real cy
+    local real x
+    local real y
+    local real zoom
+    local real a
+    local real r
+    local integer j
+    local integer mode
+    local integer side = 0
+    local integer pa
+    local integer pb
+    local integer army
+    local integer owner
+    local integer array hero
+    local integer nh = 0
+    local string array fxpath
+    local integer nfx = 0
+    local effect array fx
+    local integer nfxon = 0
+    local unit array su
+    local string array sn
+    local integer ns = 0
+    local location loc = Location(0, 0)
+    local real z0
     local rect area
     local destructable tree
     local real minx = GetRectMinX(bj_mapInitialPlayableArea) + 1500
@@ -203,6 +231,34 @@ function Dataset_Run takes nothing returns nothing
     set building[11] = 'uzig'
     set nb = 12
 
+    // ---- heroes: shown sometimes, never labeled (they look like big versions of normal units) ----
+    set hero[0] = 'Hamg'
+    set hero[1] = 'Hmkg'
+    set hero[2] = 'Hpal'
+    set hero[3] = 'Hblm'
+    set hero[4] = 'Obla'
+    set hero[5] = 'Ofar'
+    set hero[6] = 'Otch'
+    set hero[7] = 'Oshd'
+    set hero[8] = 'Edem'
+    set hero[9] = 'Ekee'
+    set hero[10] = 'Emoo'
+    set hero[11] = 'Ewar'
+    set hero[12] = 'Udea'
+    set hero[13] = 'Ulic'
+    set hero[14] = 'Udre'
+    set hero[15] = 'Ucrl'
+    set nh = 16
+
+    // ---- spell effects drawn over the scene (a wrong path just shows nothing) ----
+    set fxpath[0] = "Abilities\\Spells\\Human\\ThunderClap\\ThunderClapCaster.mdl"
+    set fxpath[1] = "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl"
+    set fxpath[2] = "Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl"
+    set fxpath[3] = "Abilities\\Spells\\Undead\\DeathCoil\\DeathCoilSpecialArt.mdl"
+    set fxpath[4] = "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl"
+    set fxpath[5] = "Objects\\Spawnmodels\\Human\\HumanLargeDeathExplode\\HumanLargeDeathExplode.mdl"
+    set nfx = 6
+
     set anim[0] = "stand"
     set anim[1] = "walk"
     set anim[2] = "attack"
@@ -233,16 +289,36 @@ function Dataset_Run takes nothing returns nothing
         call GroupAddUnit(scene, CreateUnit(Player(0), building[i], minx, miny, 0))
         set i = i + 1
     endloop
+    set i = 0
+    loop
+        exitwhen i >= nh
+        call GroupAddUnit(scene, CreateUnit(Player(0), hero[i], minx, miny, 0))
+        set i = i + 1
+    endloop
     call TriggerSleepAction(2.0)
 
+    // fixed camera angle (the game's default), the box formula in the notebooks depends on it
+    call SetCameraField(CAMERA_FIELD_ROTATION, 90, 0)
+    call SetCameraField(CAMERA_FIELD_ANGLE_OF_ATTACK, 304, 0)
+    call SetCameraField(CAMERA_FIELD_ROLL, 0, 0)
+
     loop
-        // remove the previous scene
+        // remove the previous scene: units, heroes, buildings and spell effects
         loop
             set u = FirstOfGroup(scene)
             exitwhen u == null
             call GroupRemoveUnit(scene, u)
             call RemoveUnit(u)
         endloop
+        set i = 0
+        loop
+            exitwhen i >= nfxon
+            call DestroyEffect(fx[i])
+            set i = i + 1
+        endloop
+        set nfxon = 0
+        set ns = 0
+        call ClearSelection()
 
         // random walkable spot with no trees (or other destructables) where the units will stand,
         // or in front of them - trees closer to the camera would hide the units
@@ -263,27 +339,91 @@ function Dataset_Run takes nothing returns nothing
         else
             call SetFloatGameState(GAME_STATE_TIME_OF_DAY, GetRandomReal(7.0, 17.0))
         endif
+        set zoom = GetRandomReal(1350, 1900)
 
-        call PreloadGenClear()
-        call PreloadGenStart()
+        // how the units stand: 0 = in a row (30%), 1 = crowded group (30%),
+        // 2 = two armies fighting (20%), 3 = an army of one type plus one other unit (20%)
+        set mode = GetRandomInt(0, 9)
+        if mode <= 2 then
+            set mode = 0
+        elseif mode <= 5 then
+            set mode = 1
+        elseif mode <= 7 then
+            set mode = 2
+        else
+            set mode = 3
+        endif
+        set k = GetRandomInt(1, 8)
+        set army = GetRandomInt(0, n - 1)
+        set pa = GetRandomInt(0, 11)
+        set pb = ModuloInteger(pa + GetRandomInt(1, 11), 12)
+        if mode == 2 then
+            call SetPlayerAllianceStateBJ(Player(pa), Player(pb), bj_ALLIANCE_UNALLIED)
+            call SetPlayerAllianceStateBJ(Player(pb), Player(pa), bj_ALLIANCE_UNALLIED)
+            if k < 2 then
+                set k = 2
+            endif
+        endif
 
-        // 1-6 units side by side, random team color, facing and animation
-        set k = GetRandomInt(1, 6)
         set i = 0
         loop
             exitwhen i >= k
             set c = GetRandomInt(0, n - 1)
-            if id[c] == 'ushd' then
-                set u = CreateUnit(Player(0), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
-            else
-                set u = CreateUnit(Player(GetRandomInt(0, 11)), id[c], cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60), cy + GetRandomReal(-300, 150), GetRandomReal(0, 360))
+            if mode == 3 and i < k - 1 then
+                set c = army
             endif
-            call UnitAddAbility(u, 'Aloc')
-            call SetUnitAnimation(u, anim[GetRandomInt(0, 2)])
+            if mode == 0 then
+                set x = cx - 550 + 1100.0 * (i + 0.5) / k + GetRandomReal(-60, 60)
+                set y = cy + GetRandomReal(-300, 150)
+            elseif mode == 2 then
+                set side = ModuloInteger(i, 2)
+                set x = cx - 350 + 700 * side + GetRandomReal(-150, 150)
+                set y = cy - 75 + GetRandomReal(-200, 200)
+            else
+                set a = GetRandomReal(0, 2 * bj_PI)
+                set r = GetRandomReal(0, 100 + 40 * k)
+                set x = cx + r * Cos(a)
+                set y = cy - 75 + r * Sin(a) * 0.7
+            endif
+            // the Shade is invisible to everyone but its owner, so it always belongs to us
+            if id[c] == 'ushd' then
+                set owner = 0
+            elseif mode == 2 and side == 0 then
+                set owner = pa
+            elseif mode == 2 then
+                set owner = pb
+            else
+                set owner = GetRandomInt(0, 11)
+            endif
+            set u = CreateUnit(Player(owner), id[c], x, y, GetRandomReal(0, 360))
+            if mode == 2 then
+                // they really fight (attack animations, spells, blood), but nobody dies before the screenshot
+                call BlzSetUnitMaxHP(u, 100000)
+                call SetUnitState(u, UNIT_STATE_LIFE, 100000)
+                call IssuePointOrder(u, "attack", cx, cy - 75)
+            else
+                call UnitAddAbility(u, 'Aloc')
+                call SetUnitAnimation(u, anim[GetRandomInt(0, 2)])
+            endif
             call GroupAddUnit(scene, u)
-            call Preload(name[c])
+            set su[ns] = u
+            set sn[ns] = name[c]
+            set ns = ns + 1
             set i = i + 1
         endloop
+
+        // sometimes 1-2 heroes (not labeled: the model must learn they are not one of the 48 units)
+        if GetRandomInt(1, 3) == 1 then
+            set j = GetRandomInt(1, 2)
+            loop
+                exitwhen j <= 0
+                set u = CreateUnit(Player(GetRandomInt(0, 11)), hero[GetRandomInt(0, nh - 1)], cx + GetRandomReal(-500, 500), cy - 75 + GetRandomReal(-250, 250), GetRandomReal(0, 360))
+                call UnitAddAbility(u, 'Aloc')
+                call SetUnitAnimation(u, anim[GetRandomInt(0, 2)])
+                call GroupAddUnit(scene, u)
+                set j = j - 1
+            endloop
+        endif
 
         // sometimes a building in the background
         if GetRandomInt(1, 2) == 1 then
@@ -293,7 +433,48 @@ function Dataset_Run takes nothing returns nothing
         endif
 
         call SetCameraPosition(cx, cy)
-        call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, GetRandomReal(1350, 1900), 0)
+        call SetCameraField(CAMERA_FIELD_TARGET_DISTANCE, zoom, 0)
+        if mode == 2 then
+            call TriggerSleepAction(1.2)
+        endif
+
+        // sometimes our fighting units are selected (green circles; Aloc units can't be selected)
+        if GetRandomInt(1, 3) == 1 then
+            set i = 0
+            loop
+                exitwhen i >= ns
+                if GetOwningPlayer(su[i]) == Player(0) then
+                    call SelectUnit(su[i], true)
+                endif
+                set i = i + 1
+            endloop
+        endif
+
+        // sometimes spell effects on top of the scene
+        if GetRandomInt(1, 3) == 1 then
+            set j = GetRandomInt(1, 3)
+            loop
+                exitwhen j <= 0
+                set fx[nfxon] = AddSpecialEffect(fxpath[GetRandomInt(0, nfx - 1)], cx + GetRandomReal(-450, 450), cy - 75 + GetRandomReal(-250, 250))
+                set nfxon = nfxon + 1
+                set j = j - 1
+            endloop
+        endif
+
+        // freeze the units and write where each labeled unit really is now
+        // (the game pushes units apart when they are created on top of each other, and fighters move)
+        call MoveLocation(loc, cx, cy)
+        set z0 = GetLocationZ(loc)
+        call PreloadGenClear()
+        call PreloadGenStart()
+        set i = 0
+        loop
+            exitwhen i >= ns
+            call PauseUnit(su[i], true)
+            call MoveLocation(loc, GetUnitX(su[i]), GetUnitY(su[i]))
+            call Preload("UNIT|" + sn[i] + "|" + R2S(GetUnitX(su[i]) - cx) + "|" + R2S(GetUnitY(su[i]) - cy) + "|" + R2S(zoom) + "|" + R2S(GetLocationZ(loc) - z0))
+            set i = i + 1
+        endloop
         call PreloadGenEnd("wc3dataset\\shot_" + I2S(shot) + ".txt")
         set shot = shot + 1
         call TriggerSleepAction(1.5)
