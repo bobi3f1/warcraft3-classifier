@@ -1,5 +1,6 @@
 // The classifier page logic, shared by index.html (Night Elf theme) and moonlit.html.
-// Both pages have the same elements: #well, #preview, #status, #result, #file, #choose, #empty, #examples, #model-name.
+// Both pages have the same elements: #well, #preview, #status, #result, #file, #choose, #change, #full, #tools,
+// #empty, #examples, #model-name.
 // The same steps as classifier_app.py: the model looks at the whole screenshot and answers for 33600 places on it.
 const SIZE = 1280, PLACES = 33600;                 // the model takes a 1280x1280 image
 
@@ -13,7 +14,7 @@ marks.id = "marks";
 well.append(marks);
 // info = model.json: labels, conf, overlap, model_file, model_name, examples
 // (+ example_counts: every unit; example_labels: only which types, for the old map4 examples)
-let session, info, truth = null, counted = false;
+let session, info, truth = null, counted = false, found = [];
 
 async function loadModel() {
   info = await (await fetch("model.json?v=yolo26m")).json();
@@ -105,23 +106,29 @@ function crop(img, box) {
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
-function drawMarks(img, units) {
-  marks.width = SIZE;
-  marks.height = Math.round(SIZE * img.naturalHeight / img.naturalWidth);
-  const ctx = marks.getContext("2d");
-  ctx.font = "bold 26px system-ui, sans-serif";
-  ctx.lineWidth = 5;
+// A yellow dot where each unit stands, with its number. scale, startX, startY place the 1280-wide screenshot on the canvas.
+function drawUnits(ctx, units, scale, startX, startY, withNames) {
+  ctx.font = `bold ${withNames ? 16 : 26}px system-ui, sans-serif`;
+  ctx.lineWidth = withNames ? 4 : 5;
   units.forEach((u, i) => {
     const [left, top, right, bottom] = u.box;
-    const x = (left + right) / 2, y = bottom - (bottom - top) * 145 / 465;    // where the unit stands (the box is loose)
+    const x = startX + scale * (left + right) / 2;
+    const y = startY + scale * (bottom - (bottom - top) * 145 / 465);         // where the unit stands (the box is loose)
+    const text = withNames ? `${i + 1}. ${u.label}` : i + 1;
     ctx.fillStyle = "#ffe600";
     ctx.beginPath();
     ctx.arc(x, y, 7, 0, 2 * Math.PI);
     ctx.fill();
     ctx.strokeStyle = "#000";
-    ctx.strokeText(i + 1, x + 11, y - 9);
-    ctx.fillText(i + 1, x + 11, y - 9);
+    ctx.strokeText(text, x + 11, y - 9);
+    ctx.fillText(text, x + 11, y - 9);
   });
+}
+
+function drawMarks(img, units) {
+  marks.width = SIZE;
+  marks.height = Math.round(SIZE * img.naturalHeight / img.naturalWidth);
+  drawUnits(marks.getContext("2d"), units, 1, 0, 0, false);
 }
 
 const percent = p => p < 0.001 ? "under 0.1%" : `${(p * 100).toFixed(1)}%`;
@@ -156,7 +163,9 @@ async function classify() {
   status.textContent = "Looking...";
   await new Promise(done => setTimeout(done, 30));   // let the text appear: without WebGPU the model takes ~7 s
   const units = await findUnits(preview);
+  found = units;
   drawMarks(preview, units);
+  if (viewer.open) placeImage();
   const { wrong, missed } = truth ? compare(units) : { wrong: new Set(), missed: [] };
   status.textContent = units.length ? `Found ${units.length} unit${units.length > 1 ? "s" : ""}.`
                                     : "No units found. Small or hidden units may be missed.";
@@ -174,11 +183,13 @@ function show(src, labels = null, exact = false) {
   truth = labels;
   counted = exact;
   result.innerHTML = "";
+  found = [];
   marks.width = 0;
   preview.onload = classify;
   preview.src = src;
   preview.hidden = false;
   document.getElementById("empty").hidden = true;
+  document.getElementById("tools").hidden = false;
   well.classList.add("filled");
 }
 
@@ -189,11 +200,118 @@ function showFile(file) {
 }
 
 document.getElementById("choose").onclick = () => fileInput.click();
-fileInput.onchange = e => showFile(e.target.files[0]);
+document.getElementById("change").onclick = () => fileInput.click();
+fileInput.onchange = e => {
+  showFile(e.target.files[0]);
+  e.target.value = "";                   // so the same file can be chosen again
+};
 well.ondragover = e => { e.preventDefault(); well.classList.add("drag"); };
 well.ondragleave = () => well.classList.remove("drag");
 well.ondrop = e => { e.preventDefault(); well.classList.remove("drag"); showFile(e.dataTransfer.files[0]); };
 document.onpaste = e => showFile([...e.clipboardData.files][0]);
+
+// ---- the full-screen viewer: wheel or + and - to zoom, drag to move, Esc to close ----
+const viewer = document.createElement("dialog");
+viewer.id = "viewer";
+viewer.setAttribute("aria-label", "The screenshot in full screen");
+viewer.innerHTML = `<div class="viewer-stage" id="viewer-stage">
+    <img id="viewer-image" alt="The screenshot, zoomed">
+    <canvas id="viewer-marks"></canvas>
+  </div>
+  <div class="viewer-tools">
+    <span id="viewer-zoom" aria-live="polite"></span>
+    <button id="viewer-out" type="button" aria-label="Zoom out">&minus;</button>
+    <button id="viewer-in" type="button" aria-label="Zoom in">+</button>
+    <button id="viewer-fit" type="button">Fit</button>
+    <button id="viewer-names" type="button">Hide names</button>
+    <button id="viewer-close" type="button">Close</button>
+  </div>`;
+document.body.append(viewer);
+const stage = document.getElementById("viewer-stage");
+const big = document.getElementById("viewer-image");
+const bigMarks = document.getElementById("viewer-marks");
+let zoom = 1, shiftX = 0, shiftY = 0, fitWidth = 0, fitHeight = 0, showNames = true, dragFrom = null;
+
+// Keep the picture on screen, move and scale it, and draw the names at their normal size on top
+function placeImage() {
+  const W = stage.clientWidth, H = stage.clientHeight, w = fitWidth * zoom, h = fitHeight * zoom;
+  shiftX = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, shiftX));
+  shiftY = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, shiftY));
+  big.style.transform = `translate(${shiftX}px, ${shiftY}px) scale(${zoom})`;
+  document.getElementById("viewer-zoom").textContent = `${Math.round(zoom * 100)}%`;
+  bigMarks.width = W * devicePixelRatio;
+  bigMarks.height = H * devicePixelRatio;
+  const ctx = bigMarks.getContext("2d");
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  if (showNames) drawUnits(ctx, found, w / SIZE, shiftX, shiftY, true);
+}
+
+function fitImage() {
+  const scale = Math.min(stage.clientWidth / preview.naturalWidth, stage.clientHeight / preview.naturalHeight);
+  fitWidth = preview.naturalWidth * scale;
+  fitHeight = preview.naturalHeight * scale;
+  big.style.width = `${fitWidth}px`;
+  big.style.height = `${fitHeight}px`;
+  zoom = 1;
+  placeImage();
+}
+
+// Zoom around one point of the screen, so what is under the mouse stays there
+function zoomAt(x, y, factor) {
+  const next = Math.min(8, Math.max(1, zoom * factor));
+  shiftX = x - (x - shiftX) * next / zoom;
+  shiftY = y - (y - shiftY) * next / zoom;
+  zoom = next;
+  placeImage();
+}
+
+const zoomMiddle = factor => zoomAt(stage.clientWidth / 2, stage.clientHeight / 2, factor);
+
+function openViewer() {
+  if (preview.hidden) return;
+  big.src = preview.src;
+  viewer.showModal();
+  fitImage();
+  viewer.requestFullscreen?.().catch(() => {});     // without it the viewer still fills the browser window
+}
+
+preview.onclick = openViewer;
+document.getElementById("full").onclick = openViewer;
+document.getElementById("viewer-in").onclick = () => zoomMiddle(1.5);
+document.getElementById("viewer-out").onclick = () => zoomMiddle(1 / 1.5);
+document.getElementById("viewer-fit").onclick = fitImage;
+document.getElementById("viewer-close").onclick = () => viewer.close();
+document.getElementById("viewer-names").onclick = e => {
+  showNames = !showNames;
+  e.target.textContent = showNames ? "Hide names" : "Show names";
+  placeImage();
+};
+stage.onwheel = e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.25 : 0.8); };
+stage.ondblclick = e => zoomAt(e.clientX, e.clientY, zoom > 1 ? 1 / zoom : 2.5);
+stage.onpointerdown = e => {
+  dragFrom = [e.clientX, e.clientY];
+  stage.setPointerCapture(e.pointerId);
+  stage.classList.add("moving");
+};
+stage.onpointermove = e => {
+  if (!dragFrom) return;
+  shiftX += e.clientX - dragFrom[0];
+  shiftY += e.clientY - dragFrom[1];
+  dragFrom = [e.clientX, e.clientY];
+  placeImage();
+};
+stage.onpointerup = stage.onpointercancel = () => {
+  dragFrom = null;
+  stage.classList.remove("moving");
+};
+viewer.onkeydown = e => {
+  if (e.key === "+" || e.key === "=") zoomMiddle(1.5);
+  if (e.key === "-") zoomMiddle(1 / 1.5);
+  if (e.key === "0") fitImage();
+};
+viewer.onclose = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+document.onfullscreenchange = () => { if (!document.fullscreenElement && viewer.open) viewer.close(); };
+window.addEventListener("resize", () => { if (viewer.open) fitImage(); });
 
 loadModel().then(() => { if (preview.src) classify(); })
            .catch(err => status.textContent = "Could not load the model: " + err.message);

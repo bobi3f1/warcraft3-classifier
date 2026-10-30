@@ -17,6 +17,7 @@
 .empty button { margin-top: 16px; }
 #preview { display: block; width: 100%; height: auto; }
 #marks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 
 /* the results */
 .finder-seen h2 { margin-top: 0; }
