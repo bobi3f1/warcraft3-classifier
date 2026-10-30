@@ -168,7 +168,6 @@ Kaggle.) Половината генерирани сцени слагат ед�
 | `game_capture/dataset_trigger.j` | Скрипт за World Editor: показва случайни единици и записва кои са |
 | `game_capture/capture.py` | Прави screenshot-ите и записва етикетите в `data/labels.csv` |
 | `docs/` | **Сайтът** за GitHub Pages: `index.html`, `model-yolo26m.onnx`, `model.json`, примерни снимки |
-| `app.py` | Gradio приложение за версии 1 и 2 (като в Lesson 2) |
 | `data/` | Снимките (не се качват в GitHub) |
 
 ## Как да повторите проекта (на компютъра с играта и GPU)
@@ -318,11 +317,10 @@ plugins:
 3. **Settings → Pages → Source: Deploy from a branch → Branch: `main`, папка `/docs`** → **Save**.
 4. След 1–2 минути сайтът е на `https://<вашето-име>.github.io/warcraft3-classifier/`.
 
-## Gradio (Lesson 2)
+## Локално приложение (Gradio, като в Lesson 2)
 
-Версия 3: `python classifier_app.py` → `http://127.0.0.1:7860`. Приложението използва модела от `docs/`.
-Версии 1 и 2: `python app.py` (нужен е `model.pkl`, който не е в GitHub). С `intf.launch(share=True)` получавате
-временен публичен линк, докато компютърът работи — удобно за презентация.
+`python classifier_app.py` → `http://127.0.0.1:7860`. Приложението използва модела от `docs/`. С
+`intf.launch(share=True)` получавате временен публичен линк, докато компютърът работи — удобно за презентация.
 
 ## Ограничения
 
@@ -335,15 +333,7 @@ plugins:
 
 ## Следващ етап: реален gameplay
 
-Планът към **90% изцяло правилни screenshot-и** е в [REAL_GAMEPLAY_PLAN.md](REAL_GAMEPLAY_PLAN.md).
-Това е цел за отделен реален test set, а не вече постигнат или гарантиран резултат. Следващата проверка е една игра
-между компютърни играчи на непозната карта (`--map battle-test1`), където единиците имат сблъсък като в истинска игра.
-
-За етикетиране на собствени Classic gameplay кадри стартирайте:
-
-```powershell
-.venv\Scripts\python.exe game_capture\label_gameplay.py
-```
-
-Инструкции: [game_capture/GAMEPLAY_GUIDE.md](game_capture/GAMEPLAY_GUIDE.md). Етикетирането е локално и не изисква GPU.
-Дръжте всички кадри от една игра/replay само в една група: training, validation или test.
+Целта е поне 90% изцяло правилни снимки върху отделен набор от истински игри. Това още не е постигнато. Следващата
+проверка е една игра между компютърни играчи на непозната карта (`--map battle-test1`), където единиците имат
+сблъсък като в истинска игра. След нея идват истински screenshot-и. Кадрите от една игра трябва да стоят само в
+една група: обучение, validation или test.
