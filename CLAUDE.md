@@ -119,9 +119,19 @@ single-label classifier names each crop.
   88.6% (132); 1 unit 95.7% → 8 units 36.4%. List level: 185 missed, 58 extra of 1782. Modes 1 and 3 of
   `dataset_trigger.j` scatter `Aloc` units with no collision, so they stack; by eye on 12 miss-only shots, 7 missed
   units can't be seen or counted, 3 partly hidden, 2 real misses. So retraining on the same data won't fix this.
+- **The trained detector is NOT NMS-free:** `best.pt` has `end2end False` and `best.onnx` metadata too, despite
+  `end2end: True` in the yaml. ONNX output is raw (1, 52, 33600): centre x, y, width, height in 1280×1280 pixels
+  (image pasted at y = 280) + 48 sigmoid scores, with many anchors firing per unit. Ultralytics hid this by running
+  NMS (iou 0.7, per class) in `predict`, so a page must do that too. `classifier_app.py` does it in plain numpy
+  and matched ultralytics on 40/40 validation shots.
+- 2026-10-30, 70 good shots (`good_screenshots_70.csv`, `test_good_screenshots.py`): from the test map, spacing
+  ≥ ~100 px and nothing cut off, random order, effect/building-covered shots rejected by eye, all fixed before
+  scoring; 15 one-unit + 55 multi-unit, 183 units, 44/48 types. **65/70 = 92.9% exact (Wilson 95% about 84–97%),
+  names only 94.3%, count 94.3%, units 180/183 = 98.4%.** Namer chosen on 119 rule-only good valid shots: YOLO names
+  93.3% exact, local solo-only `data/unit_crops/unit_classifier.pkl` 68.9% (the Kaggle pkl isn't on this PC).
 - Still to do: `battle-test1` on an unseen map (real collision, automatic labels; evaluate locally, no Kaggle
-  needed), then real screenshots, then a new site page for the detector (box decoding in `docs/app.js`, YOLO26
-  is NMS-free; the ONNX output is the raw (1, 52, 33600) tensor).
+  needed), then real screenshots. A site page needs `predict` + NMS ported to `docs/app.js`, and a retest on the
+  same 70 if the model is quantized (78.5 MB now).
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
 
@@ -162,6 +172,8 @@ single-label classifier names each crop.
   (`device='cpu'` stops ultralytics installing `onnxruntime-gpu`). launch.json name `detector-app`, port 7860.
   PNG and TGA at 1920×1080 checked through its API (`/find_units`). Examples are listed at start, so restart it
   to see new `battle-test1` shots. While `capture.py` runs, keep it off the main monitor: capture grabs that screen.
+- `classifier_app.py` — same idea, onnxruntime only (no ultralytics): each unit's crop, best guess and next two
+  guesses. launch.json name `classifier-app`, also port 7860, so run one app at a time.
 
 ## Next steps (on the gaming PC with a GPU)
 
