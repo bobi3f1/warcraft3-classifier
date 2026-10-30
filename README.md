@@ -229,13 +229,14 @@ Kaggle.) Половината генерирани сцени слагат ед�
 `my_screenshots/`. Notebook-ът ще покаже какво разпознава на тях — това е най-честната проверка, защото
 са от истинска игра, а не от нашата карта.
 
-### 6. Обучение и публикуване
+### 6. Обучение (версия 2)
 
-1. `jupyter lab` → отворете `warcraft3_screenshots.ipynb` → **Run → Run All Cells**.
-2. Последната секция записва `docs/model.onnx`, `docs/model.json` и примерни снимки в `docs/examples/`.
+1. `jupyter lab` → отворете `warcraft3_screenshots.ipynb` и пуснете клетките до секция 6 включително.
+2. **Не пускайте секция 7 (Export за сайта).** Тя изтрива `docs/examples/` и записва модела и `docs/model.json` от
+   версия 2, а сайтът вече използва версия 3.
 3. Проверете сайта локално: `python -m http.server 8000 --directory docs` → `http://localhost:8000/moonlit.html`.
    (`index.html` използва Jekyll тема и изглежда правилно само в GitHub Pages — вижте "Темата" по-долу.)
-4. Качете в GitHub: `git add .`, `git commit -m "Version 2: game screenshots"`, `git push`.
+4. Качете в GitHub само файловете, които сте променили: `git add <файл>`, `git commit`, `git push`.
 
 ## Версия 3: данни и обучение в Kaggle
 
