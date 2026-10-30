@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="viewer.css">
 <style>
   /* Colors of a Night Elf night: sky, dusk, moonlight, moonwell water, Elune's violet */
   :root {
@@ -67,6 +68,8 @@
   .button:hover { background: #9af0e6; }
   #preview { display: block; width: 100%; height: 100%; object-fit: contain; }
   #marks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .tools { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .tools .button { margin-top: 0; }
   [hidden] { display: none !important; }
 
   /* What the model sees */
@@ -137,14 +140,20 @@
   </header>
 
   <section class="stage">
-    <div class="well" id="well">
-      <div class="empty" id="empty">
-        <strong>Drop a screenshot here</strong>
-        or paste one with Ctrl+V after pressing Print Screen in the game.
-        <br><button class="button" id="choose" type="button">Choose a file</button>
+    <div>
+      <div class="well" id="well">
+        <div class="empty" id="empty">
+          <strong>Drop a screenshot here</strong>
+          or paste one with Ctrl+V after pressing Print Screen in the game.
+          <br><button class="button" id="choose" type="button">Choose a file</button>
+        </div>
+        <img id="preview" alt="The screenshot being checked. Click to open it in full screen." hidden>
+        <input type="file" id="file" accept="image/*" hidden>
       </div>
-      <img id="preview" alt="The screenshot being checked" hidden>
-      <input type="file" id="file" accept="image/*" hidden>
+      <div class="tools" id="tools" hidden>
+        <button class="button" id="change" type="button">Choose another image</button>
+        <button class="button" id="full" type="button">Full screen</button>
+      </div>
     </div>
     <div class="seen" aria-live="polite">
       <h2>What the model sees</h2>
@@ -217,6 +226,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.webgpu.min.js"></script>
-<script src="app.js?v=yolo26m"></script>
+<script src="app.js?v=yolo26m-2"></script>
 </body>
 </html>

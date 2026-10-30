@@ -2,20 +2,27 @@
 title: Which units are on the battlefield?
 layout: page
 ---
-<link rel="stylesheet" href="finder.css">
+<link rel="stylesheet" href="finder.css?v=2">
+<link rel="stylesheet" href="viewer.css">
 
 <p class="finder-lead">Give it a Warcraft III screenshot and a YOLO model finds each unit and names it, out of
   48 unit types of the four races. It runs entirely in your browser; nothing is uploaded.</p>
 
 <div class="finder">
-  <div class="finder-well ne-panel" id="well">
-    <div class="empty" id="empty">
-      <strong>Drop a screenshot here</strong>
-      or paste one with Ctrl+V after pressing Print Screen in the game.
-      <br><button id="choose" type="button">Choose a file</button>
+  <div>
+    <div class="finder-well ne-panel" id="well">
+      <div class="empty" id="empty">
+        <strong>Drop a screenshot here</strong>
+        or paste one with Ctrl+V after pressing Print Screen in the game.
+        <br><button id="choose" type="button">Choose a file</button>
+      </div>
+      <img id="preview" alt="The screenshot being checked. Click to open it in full screen." hidden>
+      <input type="file" id="file" accept="image/*" hidden>
     </div>
-    <img id="preview" alt="The screenshot being checked" hidden>
-    <input type="file" id="file" accept="image/*" hidden>
+    <div class="tools" id="tools" hidden>
+      <button id="change" type="button">Choose another image</button>
+      <button id="full" type="button">Full screen</button>
+    </div>
   </div>
   <div class="finder-seen" aria-live="polite">
     <h2>What the model sees</h2>
@@ -81,4 +88,4 @@ layout: page
 <p><a href="moonlit.html">Switch to the moonlit style</a></p>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.webgpu.min.js"></script>
-<script src="app.js?v=yolo26m"></script>
+<script src="app.js?v=yolo26m-2"></script>
