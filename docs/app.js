@@ -11,7 +11,8 @@ const fileInput = document.getElementById("file");
 let session, info, truth = null;
 
 async function loadModel() {
-  info = await (await fetch("model.json")).json();
+  info = await (await fetch("model.json?v=small-focus-v2")).json();
+  document.getElementById("model-name").textContent = `Model: ${info.model_name}`;
   for (const name of info.examples) {
     const labels = info.example_labels?.[name];
     const button = document.createElement("button");
@@ -27,7 +28,7 @@ async function loadModel() {
     };
     document.getElementById("examples").append(button);
   }
-  session = await ort.InferenceSession.create("model.onnx");
+  session = await ort.InferenceSession.create(info.model_file || "model.onnx");
   status.textContent = "Ready. Add a screenshot or pick one below.";
 }
 
@@ -35,8 +36,8 @@ async function loadModel() {
 // divide by 255, normalize, channels first
 function toTensor(img) {
   const w = info.width, h = info.height;
-  const top = (info.crop_top ?? 0) * img.naturalHeight;
-  const bottom = (info.crop_bottom ?? 1) * img.naturalHeight;
+  const top = Math.floor((info.crop_top ?? 0) * img.naturalHeight);
+  const bottom = Math.floor((info.crop_bottom ?? 1) * img.naturalHeight);
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
@@ -71,9 +72,9 @@ async function classify() {
     const scores = logits.map((x, i) => ({ label: info.labels[i], p: 1 / (1 + Math.exp(-x)) }))
                          .sort((a, b) => b.p - a.p);
     const found = scores.filter(c => c.p >= info.threshold);
-    status.textContent = found.length ? `It found ${found.length} unit type${found.length > 1 ? "s" : ""}.`
-                                      : "It found no units. Its closest guesses:";
-    result.innerHTML = bars(found.length ? found : scores.slice(0, 3));
+    status.textContent = found.length ? `Predicted ${found.length} unit type${found.length > 1 ? "s" : ""}.`
+                                      : "No unit types identified. Small or hidden units may be missed.";
+    result.innerHTML = bars(found);
     if (truth) {
       const right = found.filter(c => truth.includes(c.label)).length;
       const missed = truth.filter(l => !found.some(c => c.label === l));

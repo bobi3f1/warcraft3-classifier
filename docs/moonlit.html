@@ -140,6 +140,7 @@
     </div>
     <div class="seen" aria-live="polite">
       <h2>What the model sees</h2>
+      <p id="model-name">Model: Small Focus v2</p>
       <p id="status">Loading the model...</p>
       <div id="result"></div>
     </div>
@@ -155,7 +156,8 @@
   <section class="about">
     <h2>How it works</h2>
     <p>The training pictures were taken by the game itself: a World Editor map places random units, takes
-      a screenshot and writes down their names. A convnext_tiny model was fine-tuned on them with fastai,
+      a screenshot and writes down their names. A ConvNeXt Small model was fine-tuned with fastai on the
+      cleaned screenshots and additional focus captures,
       exported to ONNX and runs here with onnxruntime-web. It looks at the battlefield only, without the
       game's top bar and bottom panel. Small units like Peons and Ghouls are the hardest for it.</p>
     <p><a href="./">Switch to the Night Elf interface style</a></p>
@@ -163,6 +165,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.min.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=small-focus-v2-no-guesses"></script>
 </body>
 </html>

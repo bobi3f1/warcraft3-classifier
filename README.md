@@ -372,3 +372,17 @@ plugins:
 - Моделът казва **кои** единици има, но не **къде** са и **колко** са (това е object detection — друга задача).
 - Сградите и героите не се разпознават (сградите се появяват на снимките, за да се научи да ги пренебрегва).
 - Неофициален учебен проект. Warcraft е собственост на Blizzard Entertainment.
+
+## Следващ етап: реален gameplay
+
+Планът към **90% изцяло правилни screenshot-и** е в [REAL_GAMEPLAY_PLAN.md](REAL_GAMEPLAY_PLAN.md).
+Това е цел за отделен реален test set, а не вече постигнат или гарантиран резултат.
+
+За етикетиране на собствени Classic gameplay кадри стартирайте:
+
+```powershell
+.venv\Scripts\python.exe game_capture\label_gameplay.py
+```
+
+Инструкции: [game_capture/GAMEPLAY_GUIDE.md](game_capture/GAMEPLAY_GUIDE.md). Етикетирането е локално и не изисква GPU.
+Дръжте всички кадри от една игра/replay само в една група: training, validation или test.
