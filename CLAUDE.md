@@ -130,8 +130,15 @@ single-label classifier names each crop.
   names only 94.3%, count 94.3%, units 180/183 = 98.4%.** Namer chosen on 119 rule-only good valid shots: YOLO names
   93.3% exact, local solo-only `data/unit_crops/unit_classifier.pkl` 68.9% (the Kaggle pkl isn't on this PC).
 - Still to do: `battle-test1` on an unseen map (real collision, automatic labels; evaluate locally, no Kaggle
-  needed), then real screenshots. A site page needs `predict` + NMS ported to `docs/app.js`, and a retest on the
-  same 70 if the model is quantized (78.5 MB now).
+  needed), then real screenshots.
+- 2026-10-30, site moved to Version 3: `docs/app.js` is now a port of `classifier_app.py` (WebGPU, then wasm; the old
+  V1/V2 model paths are gone). `docs/model-yolo26m.onnx` = `best.onnx` with float16 initializers + Cast nodes, 41.3 MB,
+  same 111/119 on good valid shots as float32; dynamic int8 (21.4 MB, ConvInteger, no WebGPU) was not needed. In the
+  browser with the page's own code: same 65/70, same 5 wrong shots, 180/183, ~195 ms/shot WebGPU, ~7 s wasm single
+  thread (Pages has no cross-origin isolation). To retest, serve the repo root (launch.json `repo-root`, port 8003).
+  Gallery: 8 old map4 (`example_labels`, names only) + 15 new test-map shots (`example_counts`, picked BECAUSE the
+  model gets them right, so never add them to the score; together they show all 48 types). Bump `?v=` on `app.js`
+  and `model.json` when changing them.
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
 

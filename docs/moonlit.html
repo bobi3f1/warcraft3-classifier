@@ -66,12 +66,15 @@
   }
   .button:hover { background: #9af0e6; }
   #preview { display: block; width: 100%; height: 100%; object-fit: contain; }
+  #marks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   [hidden] { display: none !important; }
 
   /* What the model sees */
   .seen h2 { font: 500 1.75rem/1.2 var(--display); margin: 0 0 4px; }
   #status { color: var(--lilac); margin: 0 0 14px; min-height: 1.5em; }
-  .unit { margin: 0 0 12px; }
+  .unit { display: grid; grid-template-columns: 62px 1fr; gap: 10px; margin: 0 0 14px; }
+  .crop { display: block; width: 62px; height: 82px; object-fit: cover; border-radius: 4px; }
+  .next { margin-top: 3px; font-size: 0.82rem; color: var(--lilac); }
   .unit .row { display: flex; justify-content: space-between; gap: 12px; }
   .unit .p { color: var(--lilac); font-variant-numeric: tabular-nums; }
   .bar { height: 6px; margin-top: 4px; background: var(--dusk); border-radius: 3px; overflow: hidden; }
@@ -120,8 +123,8 @@
       <circle cx="50" cy="50" r="30" fill="#e9e6ff" mask="url(#crescent)"/>
     </svg>
     <h1>Which units are on the battlefield?</h1>
-    <p class="lead">Give it a Warcraft III screenshot and a fastai model names the units it can see,
-      out of 48 unit types of the four races. It runs entirely in your browser; nothing is uploaded.</p>
+    <p class="lead">Give it a Warcraft III screenshot and a YOLO model finds each unit and names it, out of
+      48 unit types of the four races. It runs entirely in your browser; nothing is uploaded.</p>
     <svg class="trees" viewBox="0 0 1000 70" preserveAspectRatio="none" aria-hidden="true">
       <path fill="#1f1844" d="M0 70V44c30-16 52-18 70-4 14-20 40-26 62-8 18-24 52-22 66 2 22-14 44-12 58 6 20-26 58-26 74 0 16-12 38-10 52 6 24-22 60-20 76 4 18-14 40-10 54 8 22-24 56-22 70 2 20-12 42-8 54 10 24-20 56-18 70 4 18-10 40-6 50 10 22-16 50-14 64 4 16-12 36-8 46 8 20-16 46-14 60 2V70z"/>
       <path fill="#171236" d="M0 70V58c26-10 48-10 62 2 20-14 46-14 60 2 24-12 50-10 64 4 18-8 40-8 52 4 26-14 56-12 70 4 22-10 44-8 58 4 20-12 48-10 60 4 24-10 50-8 64 4 18-10 42-8 56 4 22-12 52-10 66 4 20-8 42-6 54 6 24-12 52-10 64 4 18-8 38-6 50 4 20-10 44-8 56 4V70z"/>
@@ -140,31 +143,38 @@
     </div>
     <div class="seen" aria-live="polite">
       <h2>What the model sees</h2>
-      <p id="model-name">Model: Small Focus v2</p>
+      <p id="model-name">Model: YOLO26m</p>
       <p id="status">Loading the model...</p>
       <div id="result"></div>
     </div>
   </section>
 
   <section class="gallery">
-    <h2>Try one from the test map</h2>
-    <p>These screenshots come from a map the model never saw while it was learning. Pick one to compare
-      its guesses with the units that are really there.</p>
+    <h2>Try a screenshot</h2>
+    <p>All of these come from two maps the model never trained on. Pick one to compare its guesses with
+      the units that are really there. The first 8 are the same sample this site has always shown. The other
+      15 were picked because the model gets them fully right, so they show what it can do, not how often
+      it succeeds.</p>
     <div class="shots" id="examples"></div>
   </section>
 
   <section class="about">
     <h2>How it works</h2>
-    <p>The training pictures were taken by the game itself: a World Editor map places random units, takes
-      a screenshot and writes down their names. A ConvNeXt Small model was fine-tuned with fastai on the
-      cleaned screenshots and additional focus captures,
-      exported to ONNX and runs here with onnxruntime-web. It looks at the battlefield only, without the
-      game's top bar and bottom panel. Small units like Peons and Ghouls are the hardest for it.</p>
+    <p>The training pictures were taken by the game itself: World Editor maps place random units or let
+      computer players fight, take a screenshot and write down each unit's name and position. A YOLO26m
+      model (Ultralytics) learned from them to find every unit and give it 48 scores, one for each type.
+      It was exported to ONNX and runs here with onnxruntime-web.</p>
+    <h2>How good it is</h2>
+    <p>On 70 clean screenshots from a map it never trained on, it got 65 fully right (92.9%) and 180 of 183
+      units right. Those 70 were chosen before looking at its answers, with no unit stacked on another and
+      none covered by a spell effect. On all 400 screenshots of that map it got 63.8% fully right, because
+      units often stand on top of each other there. It has not been measured on real games yet, so expect
+      more mistakes on those. Heroes and buildings are ignored on purpose.</p>
     <p><a href="./">Switch to the Night Elf interface style</a></p>
   </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.min.js"></script>
-<script src="app.js?v=small-focus-v2-no-guesses"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.webgpu.min.js"></script>
+<script src="app.js?v=yolo26m"></script>
 </body>
 </html>

@@ -1,125 +1,250 @@
 {
-  "labels": [
-    "Human Dragonhawk Rider",
-    "Human Flying Machine",
-    "Human Footman",
-    "Human Gryphon Rider",
-    "Human Knight",
-    "Human Mortar Team",
-    "Human Peasant",
-    "Human Priest",
-    "Human Rifleman",
-    "Human Siege Engine",
-    "Human Sorceress",
-    "Human Spell Breaker",
-    "Night Elf Archer",
-    "Night Elf Chimaera",
-    "Night Elf Druid of the Claw",
-    "Night Elf Druid of the Talon",
-    "Night Elf Dryad",
-    "Night Elf Faerie Dragon",
-    "Night Elf Glaive Thrower",
-    "Night Elf Hippogryph",
-    "Night Elf Hippogryph Rider",
-    "Night Elf Huntress",
-    "Night Elf Mountain Giant",
-    "Night Elf Wisp",
-    "Orc Demolisher",
-    "Orc Grunt",
-    "Orc Kodo Beast",
-    "Orc Peon",
-    "Orc Raider",
-    "Orc Shaman",
-    "Orc Tauren",
-    "Orc Wind Rider",
-    "Tauren Spirit Walker",
-    "Troll Batrider",
-    "Troll Headhunter",
-    "Troll Witch Doctor",
-    "Undead Abomination",
-    "Undead Acolyte",
-    "Undead Banshee",
-    "Undead Crypt Fiend",
-    "Undead Destroyer",
-    "Undead Frost Wyrm",
-    "Undead Gargoyle",
-    "Undead Ghoul",
-    "Undead Meat Wagon",
-    "Undead Necromancer",
-    "Undead Obsidian Statue",
-    "Undead Shade"
+ "labels": [
+  "Human Dragonhawk Rider",
+  "Human Flying Machine",
+  "Human Footman",
+  "Human Gryphon Rider",
+  "Human Knight",
+  "Human Mortar Team",
+  "Human Peasant",
+  "Human Priest",
+  "Human Rifleman",
+  "Human Siege Engine",
+  "Human Sorceress",
+  "Human Spell Breaker",
+  "Night Elf Archer",
+  "Night Elf Chimaera",
+  "Night Elf Druid of the Claw",
+  "Night Elf Druid of the Talon",
+  "Night Elf Dryad",
+  "Night Elf Faerie Dragon",
+  "Night Elf Glaive Thrower",
+  "Night Elf Hippogryph",
+  "Night Elf Hippogryph Rider",
+  "Night Elf Huntress",
+  "Night Elf Mountain Giant",
+  "Night Elf Wisp",
+  "Orc Demolisher",
+  "Orc Grunt",
+  "Orc Kodo Beast",
+  "Orc Peon",
+  "Orc Raider",
+  "Orc Shaman",
+  "Orc Tauren",
+  "Orc Wind Rider",
+  "Tauren Spirit Walker",
+  "Troll Batrider",
+  "Troll Headhunter",
+  "Troll Witch Doctor",
+  "Undead Abomination",
+  "Undead Acolyte",
+  "Undead Banshee",
+  "Undead Crypt Fiend",
+  "Undead Destroyer",
+  "Undead Frost Wyrm",
+  "Undead Gargoyle",
+  "Undead Ghoul",
+  "Undead Meat Wagon",
+  "Undead Necromancer",
+  "Undead Obsidian Statue",
+  "Undead Shade"
+ ],
+ "conf": 0.5,
+ "overlap": 0.7,
+ "model_file": "model-yolo26m.onnx",
+ "model_name": "YOLO26m",
+ "source_notebook": "warcraft3_detector.ipynb",
+ "examples": [
+  "map4_0000.jpg",
+  "map4_0001.jpg",
+  "map4_0002.jpg",
+  "map4_0003.jpg",
+  "map4_0004.jpg",
+  "map4_0005.jpg",
+  "map4_0006.jpg",
+  "map4_0007.jpg",
+  "mixed-test1-dustwallow_0392.jpg",
+  "mixed-test1-dustwallow_0380.jpg",
+  "mixed-test1-dustwallow_0256.jpg",
+  "mixed-test1-dustwallow_0391.jpg",
+  "mixed-test1-dustwallow_0334.jpg",
+  "mixed-test1-dustwallow_0319.jpg",
+  "mixed-test1-dustwallow_0262.jpg",
+  "mixed-test1-dustwallow_0142.jpg",
+  "mixed-test1-dustwallow_0370.jpg",
+  "mixed-test1-dustwallow_0240.jpg",
+  "mixed-test1-dustwallow_0156.jpg",
+  "mixed-test1-dustwallow_0346.jpg",
+  "mixed-test1-dustwallow_0309.jpg",
+  "mixed-test1-dustwallow_0286.jpg",
+  "mixed-test1-dustwallow_0348.jpg"
+ ],
+ "example_labels": {
+  "map4_0000.jpg": [
+   "Human Sorceress",
+   "Troll Headhunter"
   ],
-  "multi_label": true,
-  "threshold": 0.2,
-  "height": 500,
-  "width": 1280,
-  "crop_top": 0.041666666666666664,
-  "crop_bottom": 0.7361111111111112,
-  "examples": [
-    "map4_0000.jpg",
-    "map4_0001.jpg",
-    "map4_0002.jpg",
-    "map4_0003.jpg",
-    "map4_0004.jpg",
-    "map4_0005.jpg",
-    "map4_0006.jpg",
-    "map4_0007.jpg"
+  "map4_0001.jpg": [
+   "Night Elf Archer",
+   "Night Elf Druid of the Talon",
+   "Night Elf Hippogryph",
+   "Orc Demolisher",
+   "Orc Peon",
+   "Orc Wind Rider"
   ],
-  "example_labels": {
-    "map4_0000.jpg": [
-      "Human Sorceress",
-      "Troll Headhunter"
-    ],
-    "map4_0001.jpg": [
-      "Night Elf Archer",
-      "Night Elf Druid of the Talon",
-      "Night Elf Hippogryph",
-      "Orc Demolisher",
-      "Orc Peon",
-      "Orc Wind Rider"
-    ],
-    "map4_0002.jpg": [
-      "Night Elf Mountain Giant",
-      "Troll Witch Doctor"
-    ],
-    "map4_0003.jpg": [
-      "Night Elf Huntress",
-      "Orc Kodo Beast",
-      "Troll Headhunter",
-      "Undead Banshee",
-      "Undead Necromancer",
-      "Undead Shade"
-    ],
-    "map4_0004.jpg": [
-      "Night Elf Faerie Dragon",
-      "Orc Kodo Beast",
-      "Undead Frost Wyrm",
-      "Undead Obsidian Statue"
-    ],
-    "map4_0005.jpg": [
-      "Human Peasant",
-      "Troll Headhunter",
-      "Undead Crypt Fiend"
-    ],
-    "map4_0006.jpg": [
-      "Troll Headhunter",
-      "Undead Abomination",
-      "Undead Destroyer",
-      "Undead Meat Wagon"
-    ],
-    "map4_0007.jpg": [
-      "Human Knight",
-      "Troll Headhunter",
-      "Undead Abomination",
-      "Undead Crypt Fiend",
-      "Undead Necromancer"
-    ]
-  },
-  "model_file": "model-small-focus-v2.onnx",
-  "model_name": "ConvNeXt Small — Focus v2",
-  "architecture": "convnext_small.fb_in22k",
-  "source_version": 2,
-  "source_notebook": "https://www.kaggle.com/code/borisaladzhov/warcraft-iii-small-focus-retraining",
-  "checkpoint": "clean_small_best.pth",
-  "weight_storage": "float16 with float32 computation"
+  "map4_0002.jpg": [
+   "Night Elf Mountain Giant",
+   "Troll Witch Doctor"
+  ],
+  "map4_0003.jpg": [
+   "Night Elf Huntress",
+   "Orc Kodo Beast",
+   "Troll Headhunter",
+   "Undead Banshee",
+   "Undead Necromancer",
+   "Undead Shade"
+  ],
+  "map4_0004.jpg": [
+   "Night Elf Faerie Dragon",
+   "Orc Kodo Beast",
+   "Undead Frost Wyrm",
+   "Undead Obsidian Statue"
+  ],
+  "map4_0005.jpg": [
+   "Human Peasant",
+   "Troll Headhunter",
+   "Undead Crypt Fiend"
+  ],
+  "map4_0006.jpg": [
+   "Troll Headhunter",
+   "Undead Abomination",
+   "Undead Destroyer",
+   "Undead Meat Wagon"
+  ],
+  "map4_0007.jpg": [
+   "Human Knight",
+   "Troll Headhunter",
+   "Undead Abomination",
+   "Undead Crypt Fiend",
+   "Undead Necromancer"
+  ]
+ },
+ "example_counts": {
+  "mixed-test1-dustwallow_0392.jpg": [
+   "Night Elf Faerie Dragon",
+   "Night Elf Wisp",
+   "Orc Tauren",
+   "Troll Witch Doctor",
+   "Undead Destroyer",
+   "Undead Meat Wagon"
+  ],
+  "mixed-test1-dustwallow_0380.jpg": [
+   "Human Gryphon Rider",
+   "Human Knight",
+   "Night Elf Archer",
+   "Troll Batrider",
+   "Undead Abomination",
+   "Undead Necromancer"
+  ],
+  "mixed-test1-dustwallow_0256.jpg": [
+   "Human Priest",
+   "Night Elf Druid of the Talon",
+   "Night Elf Dryad",
+   "Night Elf Huntress",
+   "Night Elf Mountain Giant",
+   "Tauren Spirit Walker"
+  ],
+  "mixed-test1-dustwallow_0391.jpg": [
+   "Human Spell Breaker",
+   "Night Elf Hippogryph",
+   "Night Elf Wisp",
+   "Orc Demolisher",
+   "Troll Headhunter",
+   "Undead Shade"
+  ],
+  "mixed-test1-dustwallow_0334.jpg": [
+   "Human Sorceress",
+   "Orc Shaman",
+   "Tauren Spirit Walker",
+   "Troll Witch Doctor",
+   "Undead Banshee",
+   "Undead Obsidian Statue"
+  ],
+  "mixed-test1-dustwallow_0319.jpg": [
+   "Human Gryphon Rider",
+   "Night Elf Druid of the Claw",
+   "Night Elf Hippogryph",
+   "Orc Grunt",
+   "Orc Raider",
+   "Undead Ghoul"
+  ],
+  "mixed-test1-dustwallow_0262.jpg": [
+   "Human Flying Machine",
+   "Human Knight",
+   "Human Peasant",
+   "Night Elf Chimaera",
+   "Undead Crypt Fiend",
+   "Undead Meat Wagon"
+  ],
+  "mixed-test1-dustwallow_0142.jpg": [
+   "Night Elf Glaive Thrower",
+   "Night Elf Hippogryph Rider",
+   "Orc Peon",
+   "Undead Obsidian Statue",
+   "Undead Shade"
+  ],
+  "mixed-test1-dustwallow_0370.jpg": [
+   "Human Footman",
+   "Human Footman",
+   "Human Peasant",
+   "Human Spell Breaker",
+   "Undead Gargoyle",
+   "Undead Necromancer"
+  ],
+  "mixed-test1-dustwallow_0240.jpg": [
+   "Orc Demolisher",
+   "Orc Wind Rider",
+   "Tauren Spirit Walker",
+   "Undead Banshee",
+   "Undead Frost Wyrm",
+   "Undead Meat Wagon"
+  ],
+  "mixed-test1-dustwallow_0156.jpg": [
+   "Human Mortar Team",
+   "Human Siege Engine",
+   "Night Elf Archer",
+   "Orc Demolisher",
+   "Undead Meat Wagon"
+  ],
+  "mixed-test1-dustwallow_0346.jpg": [
+   "Human Dragonhawk Rider",
+   "Night Elf Druid of the Claw",
+   "Troll Witch Doctor",
+   "Undead Acolyte"
+  ],
+  "mixed-test1-dustwallow_0309.jpg": [
+   "Human Footman",
+   "Human Rifleman",
+   "Night Elf Faerie Dragon",
+   "Night Elf Huntress",
+   "Troll Witch Doctor",
+   "Undead Crypt Fiend"
+  ],
+  "mixed-test1-dustwallow_0286.jpg": [
+   "Orc Kodo Beast",
+   "Orc Kodo Beast",
+   "Orc Kodo Beast",
+   "Orc Kodo Beast",
+   "Orc Kodo Beast",
+   "Undead Shade"
+  ],
+  "mixed-test1-dustwallow_0348.jpg": [
+   "Human Knight",
+   "Night Elf Chimaera",
+   "Troll Batrider",
+   "Troll Headhunter",
+   "Undead Ghoul",
+   "Undead Necromancer"
+  ]
+ }
 }
