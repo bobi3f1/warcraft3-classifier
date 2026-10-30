@@ -98,7 +98,12 @@
   .shot:hover, .shot[aria-pressed="true"] { border-color: var(--well); color: var(--silver); }
 
   .about { margin-top: 56px; color: var(--lilac); max-width: 65ch; }
-  .about h2 { font: 500 1.5rem/1.2 var(--display); color: var(--silver); margin: 0 0 6px; }
+  .about h2 { font: 500 1.5rem/1.2 var(--display); color: var(--silver); margin: 28px 0 6px; }
+  .versions { display: grid; gap: 22px; }
+  .versions h3 { font: 500 1.25rem/1.2 var(--display); color: var(--silver); margin: 0 0 2px; }
+  .versions p { margin: 0 0 8px; }
+  .versions .score { color: var(--well); }
+  .versions strong { color: var(--silver); font-weight: 500; }
 
   @media (max-width: 760px) {
     header { padding-top: 40px; }
@@ -160,16 +165,53 @@
 
   <section class="about">
     <h2>How it works</h2>
-    <p>The training pictures were taken by the game itself: World Editor maps place random units or let
-      computer players fight, take a screenshot and write down each unit's name and position. A YOLO26m
-      model (Ultralytics) learned from them to find every unit and give it 48 scores, one for each type.
-      It was exported to ONNX and runs here with onnxruntime-web.</p>
+    <p>I took the training pictures from the game itself: World Editor maps place random units or let
+      computer players fight, take a screenshot and write down each unit's name and position. From these a
+      YOLO26m model (Ultralytics) learned to find every unit and give it 48 scores, one for each type. I
+      exported it to ONNX, and it runs here with onnxruntime-web.</p>
     <h2>How good it is</h2>
     <p>On 70 clean screenshots from a map it never trained on, it got 65 fully right (92.9%) and 180 of 183
       units right. Those 70 were chosen before looking at its answers, with no unit stacked on another and
       none covered by a spell effect. On all 400 screenshots of that map it got 63.8% fully right, because
       units often stand on top of each other there. It has not been measured on real games yet, so expect
       more mistakes on those. Heroes and buildings are ignored on purpose.</p>
+    <h2>From Version 1 to Version 3</h2>
+    <div class="versions">
+      <section>
+        <h3>Version 1: one unit at a time</h3>
+        <p class="score">82% of single-unit pictures right, 8 unit types</p>
+        <p><strong>What was wrong:</strong> it needed a picture of one unit, so it could not read a game
+          screenshot. My pictures came from the web and were full of fan art and Reforged graphics. The error
+          was 52% before I cleaned them by hand.</p>
+        <p><strong>What I changed:</strong> pictures taken by the game itself, whole screenshots, all 48 unit
+          types.</p>
+      </section>
+      <section>
+        <h3>Version 2: which units are on the screenshot?</h3>
+        <p class="score">18% of screenshots fully right, 65% of units found</p>
+        <p><strong>What was wrong:</strong> a unit is about 50×60 pixels, under 0.5% of a screenshot, so small
+          units almost disappeared at 768×300. It could say which types were there, but not how many.</p>
+        <p><strong>What I changed:</strong> more pixels (1280×500), cleaned data and extra focus captures.</p>
+      </section>
+      <section>
+        <h3>Small Focus v2: a bigger classifier</h3>
+        <p class="score">79% of screenshots with the right names</p>
+        <p><strong>What was wrong:</strong> it still could not count or point at a unit, and on a real game
+          screenshot it named units that were not there. I had also used its test map for many experiments.</p>
+        <p><strong>What I changed:</strong> no more judging the whole picture at once. Find each unit first.</p>
+      </section>
+      <section>
+        <h3>Version 3: find each unit, then name it</h3>
+        <p class="score">92% with the right names on the same map; 92.9% of clean new screenshots fully right</p>
+        <p><strong>What was wrong at first:</strong> my first detector learned only from shots of one unit type
+          and reached 43%, because it had never seen units standing close together.</p>
+        <p><strong>What I changed:</strong> mixed scenes and whole games between computer players, with the
+          game writing down each unit's position, so no boxes were drawn by hand. A bigger model trained for
+          10 hours on Kaggle.</p>
+        <p><strong>Still not solved:</strong> units stacked on top of each other, and real games.</p>
+      </section>
+    </div>
+    <p>The same map, names only: Version 2 18%, Small Focus v2 79%, first detector 43%, final model 92%.</p>
     <p><a href="./">Switch to the Night Elf interface style</a></p>
   </section>
 </main>

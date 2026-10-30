@@ -2,10 +2,10 @@ import ast
 from collections import Counter
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
-import gradio as gr, numpy as np, onnxruntime as ort, pandas as pd
+import gradio as gr, numpy as np, onnxruntime as ort
 
 CONF, OVERLAP = 0.5, 0.7        # conf was picked on validation; 0.7 = the YOLO default for removing duplicates
-session = ort.InferenceSession('best.onnx')      # exported by warcraft3_detector.ipynb
+session = ort.InferenceSession('docs/model-yolo26m.onnx')      # the model of warcraft3_detector.ipynb, as on the site
 labels = ast.literal_eval(session.get_modelmeta().custom_metadata_map['names'])
 font = ImageFont.load_default(size=20)
 
@@ -70,9 +70,9 @@ if __name__ == '__main__':
                gr.Image(label='Numbered units'),
                gr.Gallery(label='Each unit', columns=4, height=340, object_fit='contain'),
                gr.Dataframe(headers=['#', 'Best guess', '2nd guess', '3rd guess'], label='Top 3 guesses for each unit')]
-    good = pd.read_csv('good_screenshots_70.csv')['fname'][::14]
+    examples = sorted(Path('docs/examples').glob('mixed-test1-*.jpg'))[:5]
     intf = gr.Interface(fn=show, inputs=[image, conf], outputs=outputs, flagging_mode='never',
-                        examples=[[str(Path('data/screens')/f), CONF] for f in good],
+                        examples=[[str(f), CONF] for f in examples],
                         title='Warcraft III Unit Classifier',
                         description='Drop in or paste a Warcraft III screenshot (Classic graphics, 16:9). '
                                     'For every unit the model gives a name, its confidence and its next two guesses.')

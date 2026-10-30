@@ -47,8 +47,15 @@
             object-position: 50% 14%; }              /* the battlefield, without the game's UI */
 .shot span { display: block; padding: 4px 8px; }
 
+/* from Version 1 to Version 3 */
+.versions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.versions h3 { margin: 0 0 2px; }
+.versions p { margin: 0 0 8px; }
+.versions .score { color: var(--ne-gold); }
+
 @media (max-width: 760px) {
   .finder { grid-template-columns: 1fr; }
   .shots { grid-template-columns: repeat(2, 1fr); }
+  .versions { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .finder-well.glow { animation: none; } }

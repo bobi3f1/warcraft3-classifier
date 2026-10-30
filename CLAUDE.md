@@ -139,6 +139,11 @@ single-label classifier names each crop.
   Gallery: 8 old map4 (`example_labels`, names only) + 15 new test-map shots (`example_counts`, picked BECAUSE the
   model gets them right, so never add them to the score; together they show all 48 types). Bump `?v=` on `app.js`
   and `model.json` when changing them.
+- `main` holds only what the project needs (site, README, `classifier_app.py`, the test, the two Version 3 notebooks,
+  `make_kaggle_dataset.py`, capture scripts). This branch keeps the rest: these notes, `detector_app.py`,
+  `prelabel_screenshots.py`, audit reports, `SINGLE_UNIT_CAPTURE.md`. Two map4 example labels were corrected by eye
+  (Huntress on 0003, Peon on 0001 are logged but not visible). map4 has no positions, so such hidden units can't be
+  filtered there and 92.0% may be slightly low. Shadowmeld was checked as a cause and not supported by the data.
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
 
