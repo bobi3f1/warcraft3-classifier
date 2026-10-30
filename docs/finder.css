@@ -16,11 +16,14 @@
 .empty strong { display: block; margin-bottom: 4px; font: 400 1.4rem var(--ne-title); color: #f4f1e6; }
 .empty button { margin-top: 16px; }
 #preview { display: block; width: 100%; height: auto; }
+#marks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* the results */
 .finder-seen h2 { margin-top: 0; }
 #status { min-height: 1.6em; color: var(--ne-text-dim); }
-.unit { margin: 0 0 10px; }
+.unit { display: grid; grid-template-columns: 62px 1fr; gap: 10px; margin: 0 0 12px; }
+.crop { display: block; width: 62px; height: 82px; object-fit: cover; }
+.next { margin-top: 3px; font-size: 0.8rem; color: var(--ne-text-dim); }
 .unit .row { display: flex; justify-content: space-between; gap: 12px; }
 .unit .p { color: var(--ne-text-dim); font-variant-numeric: tabular-nums; }
 .bar { height: 8px; margin-top: 3px; background: #05070e; border: 1px solid #2f2647; }
@@ -44,8 +47,15 @@
             object-position: 50% 14%; }              /* the battlefield, without the game's UI */
 .shot span { display: block; padding: 4px 8px; }
 
+/* from Version 1 to Version 3 */
+.versions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.versions h3 { margin: 0 0 2px; }
+.versions p { margin: 0 0 8px; }
+.versions .score { color: var(--ne-gold); }
+
 @media (max-width: 760px) {
   .finder { grid-template-columns: 1fr; }
   .shots { grid-template-columns: repeat(2, 1fr); }
+  .versions { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .finder-well.glow { animation: none; } }

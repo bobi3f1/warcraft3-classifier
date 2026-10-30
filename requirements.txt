@@ -1,9 +1,11 @@
 fastai
 timm
+ultralytics
 gradio
 ddgs
 onnx
 onnxruntime
+onnxslim
 mss
 jupyterlab
 ipywidgets
