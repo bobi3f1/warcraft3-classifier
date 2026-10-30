@@ -10,11 +10,11 @@ topbar_stats:          # the resource counters in the top bar; hover one to see 
     value: 48
     title: Unit types the model knows
   - icon: lumber
-    value: 4
-    title: Maps the screenshots come from
+    value: 5
+    title: Maps with mixed scenes and computer games
   - icon: food
-    value: 3933
-    title: Training and test screenshots
+    value: 6528
+    title: Training, validation and test screenshots
 nav:
   - title: Unit finder
     url: /
