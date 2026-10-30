@@ -104,8 +104,24 @@ single-label classifier names each crop.
   picked on valid; reports valid / test / real-test; exports ONNX + thresholds.json.
 - `prelabel_screenshots.py` writes model drafts to `labels_draft/` (never read by notebooks) for review in
   makesense.ai; `make_kaggle_dataset.py` → `kaggle_dataset.zip`.
-- Kaggle 2026-10-28: crop notebook ran (T4×2, 24 min): valid_loss 1.76→0.63, **test mixed crops 84.1% of 1782** (crowded crops hold several units). Detector notebook now lets validation decide USE_CLASSIFIER (YOLO only vs YOLO + classifier). Still to do: detector Kaggle run, then a new site page for the detector (box decoding in
-  `docs/app.js`, YOLO26 is NMS-free).
+- Kaggle 2026-10-28: crop notebook ran (T4×2, 24 min): valid_loss 1.76→0.63, **test mixed crops 84.1% of 1782** (crowded crops hold several units). Detector notebook now lets validation decide USE_CLASSIFIER (YOLO only vs YOLO + classifier).
+- Kaggle 2026-10-30: detector ran (yolo26m, `time=10` h gave 94 epochs, ~6.5 min each on T4×2): validation P 0.976,
+  R 0.911, mAP50 0.947, mAP50-95 0.724. Picked on valid: conf 0.5, no merge (iou 1.01), **use_classifier False**.
+  **Test Dustwallow 63.8% exact (145/400 wrong)**, map4 names only 92.0% of 796 (v2 18%, solo detector 42.8%).
+  Not the 98–99% goal, and still no real screenshots. The score table is displayed output, so it isn't in the
+  Kaggle log: use the notebook's Output or recompute. `best.onnx` (78.5 MB) and `best.zip` (really `best.pt`,
+  pickle) were downloaded to the repo root; don't commit them.
+- Local check with `best.onnx` on CPU, 0.73 s/image (input fixed at 1280×1280): test 61.75% (153 wrong), valid
+  mixed 64.75%, solo valid 100%. Use `device='cpu'` and `YOLO_AUTOINSTALL=false`, otherwise ultralytics installs
+  `onnxruntime-gpu` into `.venv`, and it can't load here (needs CUDA 13). A conf/iou grid up to conf 0.8 gains
+  nothing on valid.
+- Why test is low: closest pair under ~50 px 34.0% (162 shots), ~50–100 px 70.8% (106), over ~100 px or one unit
+  88.6% (132); 1 unit 95.7% → 8 units 36.4%. List level: 185 missed, 58 extra of 1782. Modes 1 and 3 of
+  `dataset_trigger.j` scatter `Aloc` units with no collision, so they stack; by eye on 12 miss-only shots, 7 missed
+  units can't be seen or counted, 3 partly hidden, 2 real misses. So retraining on the same data won't fix this.
+- Still to do: `battle-test1` on an unseen map (real collision, automatic labels; evaluate locally, no Kaggle
+  needed), then real screenshots, then a new site page for the detector (box decoding in `docs/app.js`, YOLO26
+  is NMS-free; the ONNX output is the raw (1, 52, 33600) tensor).
 - The Codex-era untracked notebooks (`warcraft3_single_units`, `_focus_retrain`, `_clean_small_retrain`) and
   `prepare_clean_retrain.py` were never run; superseded by this plan.
 
@@ -142,6 +158,10 @@ single-label classifier names each crop.
   Full-size ONNX matched PyTorch on 100% of images. GitHub's file limit is 100 MB, so `model.pkl` and the
   full-size `model.onnx` are git-ignored; only `docs/model.onnx` (~35 MB) is committed.
 - `app.py` — Lesson-2-style Gradio app for local use only.
+- `detector_app.py` — Gradio tester for Version 3: any screenshot → boxes, names and counts from `best.onnx` on CPU
+  (`device='cpu'` stops ultralytics installing `onnxruntime-gpu`). launch.json name `detector-app`, port 7860.
+  PNG and TGA at 1920×1080 checked through its API (`/find_units`). Examples are listed at start, so restart it
+  to see new `battle-test1` shots. While `capture.py` runs, keep it off the main monitor: capture grabs that screen.
 
 ## Next steps (on the gaming PC with a GPU)
 
